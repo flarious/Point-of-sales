@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point of sales</title>
+</head>
+<body>
+    <a href="/PointOfSales">กลับ</a>
+    <h1>ดูใบเสร็จรับเงิน</h1>
+    <label for="start_date">วันที่เริ่มต้น :</label>
+    <input type="date" name="start_date" id="start_date">
+    <label for="end_date">วันที่สิ้นสุด :</label>
+    <input type="date" name="end_date" id="end_date">
+    <button id="search_by_date">ค้นหา</button>
+    <table id="receipt_table">
+        <thead>
+            <tr>
+                <th>No.</th>
+                <th>เลขที่เอกสาร</th>
+                <th>วันที่</th>
+                <th>Grand Total</th>
+                <th>ดำเนินการ</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+    <template id="receipt_row">
+        <td class="no"></td>
+        <td class="receipt_code"></td>
+        <td class="receipt_date"></td>
+        <td class="grand_total"></td>
+        <td>
+            <button class="view_detail">ดูรายละเอียด</button>
+        </td>
+    </template>
+    <script type="module">
+        import {
+            getReceiptsList,
+            getReceiptByDate,
+        } from '../api.js'
+
+        const table = document.querySelector("#receipt_table")
+        const search = document.querySelector("#search_by_date")
+
+        search.addEventListener("click", filterTable)
+
+        async function getTable() {
+            const response = await getReceiptsList()
+
+            if (response.code != 200) {
+                alert(response.message)
+                return
+            }
+
+            const receipts = response.data
+
+            for (const receipt of receipts) {
+                insertRow(receipt)
+            }
+        }
+
+        async function filterTable() {
+            var startDateString = document.querySelector("#start_date").value
+            var endDateString = document.querySelector("#end_date").value
+
+            var startDate = new Date(yyyyMMddToDate(startDateString))  
+            var endDate = new Date(yyyyMMddToDate(endDateString))   
+
+            // if (startDateString == "") {
+            //     startDate = new Date(-8640000000000000)
+            // }
+            // else {
+            //     startDate = new Date(yyyyMMddToDate(startDateString))
+            // }
+
+            // if (endDateString == "") {
+            //     endDate = new Date(8640000000000000)
+            // }
+            // else {
+            //     endDate = new Date(yyyyMMddToDate(endDateString))
+            // }
+
+            const response = await getReceiptByDate(dateToddMMyyyy(startDate), dateToddMMyyyy(endDate))
+
+            if (response.code != 200) {
+                alert(response.message)
+                return
+            }
+
+            const receipts = response.data
+
+            clearTable()
+
+            for (const receipt of receipts) {
+                insertRow(receipt)
+                // if(isInRange() && !isAlreadyInTable()) {
+                //     insertRow(receipt)
+                // }
+                // else if (!isInRange() && isAlreadyInTable()) {
+                //     removeRow(receipt)
+                // }
+
+                // if (!isAlreadyInTable()) {
+                //     insertRow(receipt)
+                // }
+                // else if (!isInRange()) {
+                //     removeRow(receipt)
+                // }
+
+                // function isInRange() {
+                //     let dataDate = ddMMyyyyToDate(receipt.date)
+
+                //     if (dataDate.getTime() >= startDate.getTime() && dataDate.getTime() <= endDate.getTime()) {
+                //         return true
+                //     }
+                //     else {
+                //         return false
+                //     }
+                // } 
+
+                // function isAlreadyInTable() {
+                //     const rows = document.querySelector("tbody").querySelectorAll("tr")
+
+                //     var found
+                //     for (const row of rows) {
+                //         if (row.dataset.id == receipt.id) {
+                //             found = true
+                //             break
+                //         }
+                //         else {
+                //             found = false
+                //         }
+                //     }
+
+                //     return found
+                // }
+
+                // function isInReceiptButNotInRow() {
+                //     const rows = document.querySelector("tbody").querySelectorAll("tr")
+                //     // In both receipt and row
+                //     for (const row of rows) {
+                //         if (row.dataset.id == receipt.id) {
+                //             found = true
+                //             break
+                //         }
+                //         else {
+                //             found = false
+                //         }
+                //     }
+
+                //     if (found == false) {
+                //         // In only receipt
+                //         // Insert
+                //     }
+
+
+
+                // }
+            }
+
+            function ddMMyyyyToDate(dateString) {
+                let split = dateString.split("/")
+                let dateObject = new Date(+split[2], split[1] - 1, +split[0])
+                
+                return dateObject
+            }
+            
+            function yyyyMMddToDate(dateString) {
+                let split = dateString.split("-")
+                let dateObject = new Date(+split[0], split[1] - 1, +split[2])
+
+                return dateObject
+            }
+            
+            function dateToddMMyyyy(date) {
+                var dd = date.getDate()
+                var mm = date.getMonth() + 1
+                var yyyy = date.getFullYear()
+
+                if (dd < 10) {
+                    dd = "0" + dd
+                }
+
+                if (mm < 10) {
+                    mm = "0" + mm
+                }
+
+                return dd + "/" + mm + "/" +yyyy
+            }
+        }
+
+        function insertRow(receipt) {
+            var newRow = document.createElement('tr')
+            var template = document.querySelector('#receipt_row')
+            const index = table.rows.length
+
+            var clone = template.content.cloneNode(true)
+            newRow.dataset.id = receipt.id
+            clone.querySelector(".no").innerText = index
+            clone.querySelector(".receipt_code").innerText = receipt.code
+            clone.querySelector(".receipt_date").innerText = receipt.date
+            clone.querySelector(".grand_total").innerText = receipt.grand_total
+            clone.querySelector(".view_detail").addEventListener("click", toViewDetailPage)
+
+            newRow.append(clone)
+            table.querySelector("tbody").appendChild(newRow)
+
+            function toViewDetailPage() {
+                window.location.href = `/PointOfSales/receipt/${receipt.id}`
+            }
+        }
+
+        function removeRow(receipt) {
+            const rows = document.querySelector("tbody").querySelectorAll("tr")
+
+            var rowIndex
+            for (const row of rows) {
+                if (row.dataset.id == receipt.id) {
+                    row.remove()
+                    reorderingTable(row.rowIndex)
+                }
+            }
+
+            function reorderingTable(index) {
+                const rows = table.querySelector("tbody").querySelectorAll("tr")
+
+                for (let i = index - 1; i < rows.length; i++) {
+                    rows[i].querySelector(".no").innerText = rows[i].rowIndex
+                }
+
+            }
+        }
+        
+        function clearTable() {
+            const rows = table.querySelector('tbody').querySelectorAll('tr')
+
+            for (const row of rows) {
+                row.remove()
+            }
+        }
+
+        // const response = await getReceiptsList()
+
+        // if (response.code != 200) {
+        //     alert(response.data)
+        // }
+
+        // const receipts = response.data
+
+        // var startDate = new Date(-8640000000000000)
+        // var endDate = new Date(8640000000000000)
+
+        // function getTable() {
+        //     filterTable()
+        // }
+
+        // function filterTable() {
+        //     setFilter()
+
+        //     for (const receipt of receipts) {
+        //         if(isInRange && !isAlreadyInTable()) {
+        //             insertRow()
+        //         }
+        //         else if (!isInRange() && alreadyInTable() ){
+        //             removeRow()
+        //         }
+
+        //         function isInRange() {
+        //             let dataDate = ddMMyyyyToDate(receipt.date)
+
+        //             if (dataDate.getTime() >= startDate.getTime() && dataDate.getTime() <= endDate.getTime()) {
+        //                 return true
+        //             }
+        //             else {
+        //                 return false
+        //             }
+        //         } 
+
+        //         function isAlreadyInTable() {
+        //             const rows = document.querySelector("tbody").querySelectorAll("tr")
+
+        //             var found
+        //             for (const row of rows) {
+        //                 if (row.dataset.id == receipt.id) {
+        //                     found = true
+        //                     break
+        //                 }
+        //                 else {
+        //                     found = false
+        //                 }
+        //             }
+
+        //             return found
+        //         }
+
+        //         function insertRow() {
+        //             var newRow = document.createElement('tr')
+        //             var template = document.querySelector('#receipt_row')
+        //             const index = table.rows.length
+
+        //             var clone = template.content.cloneNode(true)
+        //             newRow.dataset.id = receipt.id
+        //             clone.querySelector(".no").innerText = index
+        //             clone.querySelector(".receipt_code").innerText = receipt.code
+        //             clone.querySelector(".receipt_date").innerText = receipt.date
+        //             clone.querySelector(".grand_total").innerText = receipt.grand_total
+        //             clone.querySelector(".view_detail").addEventListener("click", toViewDetailPage)
+
+        //             newRow.append(clone)
+        //             table.querySelector("tbody").appendChild(newRow)
+
+        //             function toViewDetailPage() {
+        //                 window.location.href = `/PointOfSales/receipt/${receipt.id}`
+        //             }
+        //         }
+
+        //         function removeRow() {
+        //             const rows = document.querySelector("tbody").querySelectorAll("tr")
+
+        //             var rowIndex
+        //             for (const row of rows) {
+        //                 if (row.dataset.id == receipt.id) {
+        //                     row.remove()
+        //                     reorderingTable(row.rowIndex)
+        //                 }
+        //             }
+
+        //             function reorderingTable(index) {
+        //                 const rows = table.querySelector("tbody").querySelectorAll("tr")
+
+        //                 for (let i = index; i < rows.length; i++) {
+        //                     rows[i].querySelector(".no").innerText = rows[i].rowIndex
+        //                 }
+
+        //             }
+        //         }
+        //     }
+        // }
+
+        // function setFilter() {
+        //     let startDateString = document.querySelector("#start_date").value
+        //     let endDateString = document.querySelector("#end_date").value
+
+        //     if (startDateString == "") {
+        //         startDate = new Date(-8640000000000000)
+        //     }
+        //     else {
+        //         startDate = new Date(yyyyMMddToDate(startDateString))
+        //     }
+
+        //     if (endDateString == "") {
+        //         endDate = new Date(8640000000000000)
+        //     }
+        //     else {
+        //         endDate = new Date(yyyyMMddToDate(endDateString))
+        //     }
+        // }
+
+        // function ddMMyyyyToDate(dateString) {
+        //     let split = dateString.split("/")
+        //     let dateObject = new Date(+split[2], split[1] - 1, +split[0])
+            
+        //     return dateObject
+        // }
+        
+        // function yyyyMMddToDate(dateString) {
+        //     let split = dateString.split("-")
+        //     let dateObject = new Date(+split[0], split[1] - 1, +split[2])
+
+        //     return dateObject
+        // }
+
+        getTable()
+    </script>
+</body>
+</html>

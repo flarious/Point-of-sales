@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point of sales</title>
+    <link rel="stylesheet" href="../hide.css">
+</head>
+<body>
+    <a href="/PointOfSales">กลับ</a>
+    <h1>ตั้งค่าหน่วยนับ</h1>
+    <button id="add">เพิ่ม</button>
+    <div id="form" class="hide">
+        <h1></h1>
+        <label for="form_unit">ชื่อหน่วย</label>
+        <input name="form_unit" id="form_unit"><br>
+        <button id="close">close</button><br>
+        <button id="save">save changes</button>
+    </div>
+    <table id="unit_table">
+        <thead>
+            <tr>
+                <th>No.</th>
+                <th>ชื่อ</th>
+                <th>ดำเนินการ</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+    <template id="unit_row">
+        <td class="no"></td>
+        <td class="unit"></td>
+        <td>
+            <button class="edit">แก้ไข</button>
+            <button class="delete">ลบ</button>
+        </td>      
+    </template>
+
+    <script type="module">
+        import {
+            getUnitsList,
+            addUnit,
+            editUnit,
+            deleteUnit
+        } from '../api.js'
+
+        const table = document.querySelector("#unit_table")
+        const form = document.querySelector("#form")
+        const addButton = document.querySelector("#add")
+
+        addButton.addEventListener("click", openAddForm)
+
+        async function getTable() {
+            const response = await getUnitsList()
+
+            if (response.code != 200) {
+                alert(response.message)
+                return
+            }
+
+            const items = response.data
+
+            for (const item of items) {
+                var newRow = document.createElement('tr')
+                var template = document.querySelector('#unit_row')
+                const index = table.rows.length
+
+                var clone = template.content.cloneNode(true)
+                clone.querySelector(".no").innerText = index
+                clone.querySelector(".unit").innerText = item.name
+                clone.querySelector(".edit").addEventListener("click", openEditForm)
+                clone.querySelector(".delete").addEventListener("click", deleteData)
+
+                newRow.append(clone)
+                table.querySelector("tbody").appendChild(newRow)
+
+                function openEditForm() {
+                    form.dataset.for = "Edit"
+                    form.classList.remove("hide")
+                    form.querySelector("h1").innerText = "แก้ไขหน่วยนับ"
+                    form.querySelector("#form_unit").value = item.name
+                    form.querySelector("#save").addEventListener("click", saveEditForm)
+                    form.querySelector("#close").addEventListener("click", closeEditForm)
+                    focusForm()
+                }
+
+                function closeEditForm() {
+                    form.classList.add("hide")
+                    form.querySelector("#save").removeEventListener("click", saveEditForm)
+                    form.querySelector("#close").removeEventListener("click", closeEditForm)
+                    unfocusForm()
+                }
+                
+                function saveEditForm() {
+                    if (form.dataset.for == "Edit") {
+                        editData()
+                    }
+                }
+
+                async function editData() {
+                    const editValue = form.querySelector("#form_unit").value
+                    if (editValue != null) {
+                        const response = await editUnit(item.id, editValue)
+
+                        if (response.code != 200) {
+                            alert(response.message + response.data)
+                            return
+                        }
+
+                        clearTable()
+                        getTable()
+
+                        closeEditForm()
+                    }
+                }
+
+                async function deleteData() {
+                    await deleteUnit(item.id)
+
+                    clearTable()
+                    getTable()
+                }
+            }
+        }
+
+        function openAddForm() {
+            form.dataset.for = "Add"
+            form.classList.remove("hide")
+            form.querySelector("h1").innerText = "เพิ่มหน่วยนับ"
+            form.querySelector("#form_unit").value = ""
+            form.querySelector("#save").addEventListener("click", saveAddForm)
+            form.querySelector("#close").addEventListener("click", closeAddForm)
+            focusForm()
+        }
+
+        function closeAddForm() {
+            form.classList.add("hide")
+            form.querySelector("#save").removeEventListener("click", saveAddForm)
+            form.querySelector("#close").removeEventListener("click", closeAddForm)
+            unfocusForm()
+        }
+
+        function saveAddForm() {
+            if (form.dataset.for == "Add") {
+                addData()
+            }
+        }
+
+        async function addData() {
+            const newUnit = form.querySelector("#form_unit").value
+            if (newUnit != null) {
+                const response = await addUnit(newUnit)
+
+                if (response.code != 200) {
+                    alert(response.message + response.data)
+                    return
+                }
+
+                // appendData()
+
+                clearTable()
+                getTable()
+
+                form.querySelector("#save").removeEventListener("click", saveAddForm)
+                closeAddForm()                    
+            }
+        }
+
+        function appendData() {
+
+        }
+
+        function reorderingTable(index) {
+            var rows = table.querySelector("tbody").querySelectorAll("tr")
+
+            for (let i = index; i < rows.length; i++) {
+                rows[i].querySelector(".no").innerText = rows[i].rowIndex
+            }
+        }
+
+        function focusForm() {
+            document.body.style.backgroundColor = "lightgray"
+            document.body.querySelectorAll("#form, #form *").forEach(
+                elem => elem.style.backgroundColor = "white"
+            )
+            document.body.querySelectorAll("*:not(#form, #form *)").forEach(
+                elem => { 
+                    elem.style.pointerEvents = "none" 
+                    elem.style.opacity = 0.5
+                }
+            )
+        }
+
+        function unfocusForm() {
+            document.body.style.backgroundColor = "white"
+            document.body.querySelectorAll("*:not(#form, #form *)").forEach(
+                elem => { 
+                    elem.style.pointerEvents = "" 
+                    elem.style.opacity = 1
+                }
+            )
+        }
+
+        function clearTable() {
+            var rowLength = table.rows.length
+            for (var i = rowLength - 1; i > 0; i--) {
+                table.deleteRow(i)
+            }
+
+            addButton.removeEventListener("click", openAddForm)
+        }
+
+        getTable()
+
+        
+
+        // async function getTable() { 
+        //     const table = document.querySelector("#unit_table")
+        //     const form = document.querySelector("#form")
+        //     const addButton = document.querySelector("#add")
+
+        //     addButton.addEventListener("click", openAddForm)
+
+        //     const response = await getUnitsList()
+
+        //     if (response.code != 200) {
+        //         alert(response.message)
+        //         return
+        //     }
+
+        //     const items = response.data
+
+        //     for (const item of items) {
+        //         var newRow = document.createElement('tr')
+        //         var template = document.querySelector('#unit_row')
+        //         const index = table.rows.length
+
+        //         var clone = template.content.cloneNode(true)
+        //         clone.querySelector(".no").innerText = index
+        //         clone.querySelector(".unit").innerText = item.name
+        //         clone.querySelector(".edit").addEventListener("click", openEditForm)
+        //         clone.querySelector(".delete").addEventListener("click", deleteData)
+
+        //         newRow.append(clone)
+        //         table.querySelector("tbody").appendChild(newRow)
+
+        //         function openEditForm() {
+        //             form.dataset.for = "Edit"
+        //             form.classList.remove("hide")
+        //             form.querySelector("h1").innerText = "แก้ไขหน่วยนับ"
+        //             form.querySelector("#form_unit").value = item.name
+        //             form.querySelector("#save").addEventListener("click", saveEditForm)
+        //             form.querySelector("#close").addEventListener("click", closeEditForm)
+        //             focusForm()
+        //         }
+
+        //         function closeEditForm() {
+        //             form.classList.add("hide")
+        //             form.querySelector("#save").removeEventListener("click", saveEditForm)
+        //             form.querySelector("#close").removeEventListener("click", closeEditForm)
+        //             unfocusForm()
+        //         }
+                
+        //         function saveEditForm() {
+        //             if (form.dataset.for == "Edit") {
+        //                 editData()
+        //             }
+        //         }
+
+        //         async function editData() {
+        //             const editValue = form.querySelector("#form_unit").value
+        //             if (editValue != null) {
+        //                 const response = await editUnit(item.id, editValue)
+
+        //                 if (response.code != 200) {
+        //                     alert(response.message + response.data)
+        //                     return
+        //                 }
+
+        //                 clearTable()
+        //                 getTable()
+
+        //                 closeEditForm()
+        //             }
+        //         }
+
+        //         async function deleteData() {
+        //             await deleteUnit(item.id)
+
+        //             clearTable()
+        //             getTable()
+        //         }
+        //     }
+
+        //     function openAddForm() {
+        //         form.dataset.for = "Add"
+        //         form.classList.remove("hide")
+        //         form.querySelector("h1").innerText = "เพิ่มหน่วยนับ"
+        //         form.querySelector("#form_unit").value = ""
+        //         form.querySelector("#save").addEventListener("click", saveAddForm)
+        //         form.querySelector("#close").addEventListener("click", closeAddForm)
+        //         focusForm()
+        //     }
+
+        //     function closeAddForm() {
+        //         form.classList.add("hide")
+        //         form.querySelector("#save").removeEventListener("click", saveAddForm)
+        //         form.querySelector("#close").removeEventListener("click", closeAddForm)
+        //         unfocusForm()
+        //     }
+
+        //     function saveAddForm() {
+        //         if (form.dataset.for == "Add") {
+        //             addData()
+        //         }
+        //     }
+
+        //     async function addData() {
+        //         const newUnit = form.querySelector("#form_unit").value
+        //         if (newUnit != null) {
+        //             const response = await addUnit(newUnit)
+
+        //             if (response.code != 200) {
+        //                 alert(response.message + response.data)
+        //                 return
+        //             }
+
+        //             clearTable()
+        //             getTable()
+
+        //             form.querySelector("#save").removeEventListener("click", saveAddForm)
+        //             closeAddForm()                    
+        //         }
+        //     }
+
+        //     function focusForm() {
+        //         document.body.style.backgroundColor = "lightgray"
+        //         document.body.querySelectorAll("#form, #form *").forEach(
+        //             elem => elem.style.backgroundColor = "white"
+        //         )
+        //         document.body.querySelectorAll("*:not(#form, #form *)").forEach(
+        //             elem => { 
+        //                 elem.style.pointerEvents = "none" 
+        //                 elem.style.opacity = 0.5
+        //             }
+        //         )
+        //     }
+
+        //     function unfocusForm() {
+        //         document.body.style.backgroundColor = "white"
+        //         document.body.querySelectorAll("*:not(#form, #form *)").forEach(
+        //             elem => { 
+        //                 elem.style.pointerEvents = "" 
+        //                 elem.style.opacity = 1
+        //             }
+        //         )
+        //     }
+
+        //     function clearTable() {
+        //         var rowLength = table.rows.length
+        //         for (var i = rowLength - 1; i > 0; i--) {
+        //             table.deleteRow(i)
+        //         }
+
+        //         addButton.removeEventListener("click", openAddForm)
+        //     }
+        // }
+      
+        // getTable()
+    </script>
+</body>
+</html>
