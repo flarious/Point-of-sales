@@ -34,9 +34,6 @@
         <button class="close">close</button><br>
         <button class="save">save changes</button>
     </div>
-    <!-- <div id="item_select">
-
-    </div> -->
     <template id="option_row">
         <td class="option_name"></td>
     </template>
@@ -101,28 +98,6 @@
             <button class="delete">ลบ</button>
         </td>
     </template>
-    <!-- <template id="order_row_placeholder">
-        <td class="no"></td>
-        <td class="item_code">
-            <button class="select_code">เลือกสินค้า</button>
-        </td>
-        <td class="item_name"></td>
-        <td class="item_unit"></td>
-        <td>
-            <input disabled type="number" class="item_quantity" value="0">
-        </td>
-        <td class="item_price">0</td>
-        <td>
-            <input disabled type="number" class="item_discount_percent" value="0">
-        </td>
-        <td class="item_discount_amount">
-            <input disabled type="number" class="item_discount_amount_placeholder" value="0">
-        </td>
-        <td class="item_total_amount">0</td>
-        <td>
-            <button disabled class="delete">ลบ</button>
-        </td>
-    </template> -->
 
     <label>ยอดรวมสินค้าก่อนส่วนลด</label>
     <input id="total_amount" disabled type="number" value="0"><br>
@@ -135,435 +110,6 @@
     <label>Grand total</label>
     <input id="grand_total" disabled type="number" value="0"><br>
     <button id="save_receipt">บันทึก</button>
-
-    <!-- <script type="module">
-        import {
-            getItemsList,
-            addReceipt,
-        } from '../api.js'
-
-        const form = document.querySelector("#item_select")
-        const options = document.querySelector("#item_options")
-        const table = document.querySelector("#order_table")
-        const choose = document.querySelector("#selected_item")
-
-        document.querySelector("#trade_discount").addEventListener("change", grandTotal)
-        document.querySelector("#save_receipt").addEventListener("click", saveOrder)
-
-        const itemsResponse = await getItemsList()
-
-        if(itemsresponse.code != 200) {
-            alert(itemsResponse.data)
-        }
-
-        const items = itemsResponse.data
-
-        for(const item of items) {
-            const newItem = document.createElement("tr")
-            var template = document.querySelector("#option_row")
-
-            var clone = template.content.cloneNode(true)
-            clone.querySelector(".option_name").innerText = item.name
-
-            newItem.dataset.id = item.id
-            newItem.addEventListener("click", selectItem)
-            newItem.append(clone)
-            options.appendChild(newItem)
-
-            function selectItem() {
-                const allItems = options.querySelectorAll("p")
-                allItems.forEach(item => item.style.color = "black")
-
-                newItem.style.color = "blue"
-                
-                document.querySelector("#placeholder").classList.add("hide")
-                choose.classList.remove("hide")
-                choose.dataset.id = item.id
-                choose.dataset.name = item.name
-                choose.dataset.code = item.code
-                choose.dataset.price = item.price
-                choose.dataset.unit = item.unit
-                choose.dataset.unit_id = item.unit_id
-                document.querySelector("#selected_item_code").innerText = item.code
-                document.querySelector("#selected_item_name").innerText = item.name
-                document.querySelector("#selected_item_price").innerText = item.price
-            }
-        }
-
-        function openAddOrder() {
-            form.dataset.for = "Add"
-            form.classList.remove("hide")
-            form.querySelector("#save").addEventListener("click", saveAddOrder)
-            form.querySelector("#close").addEventListener("click", closeAddOrder)
-
-            document.querySelector("#placeholder").classList.remove("hide")
-            choose.classList.add("hide")
-
-            options.querySelectorAll('p').forEach(option => {
-                option.style.color = "black"
-            })
-
-            focusForm()
-        }
-
-        function closeAddOrder() {
-            form.classList.add("hide")
-            form.querySelector("#save").removeEventListener("click", saveAddOrder)
-            form.querySelector("#close").removeEventListener("click", closeAddOrder)
-            unfocusForm()
-        }
-
-        function saveAddOrder() {
-            if (form.dataset.for == "Add") {
-                addOrder()
-            }
-        }
-
-        function addOrder() {
-            const lastRowIndex = table.rows.length - 1
-            const newRow = table.insertRow(lastRowIndex)
-            var template = document.querySelector("#order_row_placeholder")
-
-            var clone = template.content.cloneNode(true)
-            clone.querySelector(".no").innerText = lastRowIndex
-            clone.querySelector(".select_code").innerText = choose.dataset.code
-            clone.querySelector(".select_code").removeEventListener("click", openAddOrder)
-            clone.querySelector(".select_code").addEventListener("click", openEditOrder)
-            clone.querySelector(".select_code").dataset.id = choose.dataset.id
-            clone.querySelector(".select_code").dataset.target = lastRowIndex
-            clone.querySelector(".item_name").innerText = choose.dataset.name
-            clone.querySelector(".item_unit").innerText = choose.dataset.unit
-            clone.querySelector(".item_unit").dataset.unit_id = choose.dataset.unit_id
-            clone.querySelector(".item_quantity").disabled = false
-            clone.querySelector(".item_price").innerText = choose.dataset.price
-            clone.querySelector(".item_discount_percent").disabled = false
-            clone.querySelector(".item_discount_amount").innerText = 0
-            clone.querySelector(".delete").disabled = false
-
-            clone.querySelector(".item_quantity").addEventListener("change", totalPricePerOrder)
-            clone.querySelector(".item_quantity").addEventListener("change", totalPriceNoDiscount)
-            clone.querySelector(".item_quantity").addEventListener("change", subtotal)
-            clone.querySelector(".item_quantity").addEventListener("change", grandTotal)
-            clone.querySelector(".item_discount_percent").addEventListener("change", discountPerOrder)
-            clone.querySelector(".item_discount_percent").addEventListener("change", totalPricePerOrder)
-            clone.querySelector(".item_discount_percent").addEventListener("change", totalDiscount)
-            clone.querySelector(".item_discount_percent").addEventListener("change", subtotal)
-            clone.querySelector(".item_discount_percent").addEventListener("change", grandTotal)
-            clone.querySelector(".delete").addEventListener("click", deleteOrder)
-
-            newRow.append(clone)
-            reorderingTable(lastRowIndex)
-            closeAddOrder()
-        }
-
-        function openEditOrder(event) {
-            form.dataset.for = "Edit"
-            form.dataset.target = event.currentTarget.dataset.target
-            form.classList.remove("hide")
-            form.querySelector("#save").addEventListener("click", saveEditOrder)
-            form.querySelector("#close").addEventListener("click", closeEditOrder)
-
-            document.querySelector("#placeholder").classList.add("hide")
-            choose.classList.remove("hide")
-
-            options.querySelectorAll('p').forEach(option => {
-                if (option.dataset.id != event.currentTarget.dataset.id) {
-                    option.style.color = "black"
-                }
-            })
-
-            focusForm()
-        }
-
-        function closeEditOrder() {
-            form.classList.add("hide")
-            form.querySelector("#save").removeEventListener("click", saveEditOrder)
-            form.querySelector("#close").removeEventListener("click", closeEditOrder)
-            unfocusForm()
-        }
-
-        function saveEditOrder() {
-            if (form.dataset.for == "Edit") {
-                editOrder(form.dataset.target)
-            }
-        }
-
-        function editOrder(index) {
-            var selectedRow = document.querySelectorAll("tr")[index]
-
-            selectedRow.querySelector(".select_code").innerText = choose.dataset.code
-            selectedRow.querySelector(".select_code").dataset.id = choose.dataset.id
-            selectedRow.querySelector(".item_name").innerText = choose.dataset.name
-            selectedRow.querySelector(".item_unit").innerText = choose.dataset.unit
-            selectedRow.querySelector(".item_unit").dataset.unit_id = choose.dataset.unit_id
-            selectedRow.querySelector(".item_quantity").value = 0
-            selectedRow.querySelector(".item_price").innerText = choose.dataset.price
-            selectedRow.querySelector(".item_discount_percent").value = 0
-            selectedRow.querySelector(".item_discount_amount").innerText = 0
-
-            selectedRow.querySelector(".item_quantity").dispatchEvent(new Event('change'))
-            selectedRow.querySelector(".item_discount_percent").dispatchEvent(new Event('change'))
-
-            closeEditOrder()
-        }
-
-        function deleteOrder(event) {
-            var index = event.currentTarget.closest("tr").rowIndex
-
-            table.deleteRow(index)
-
-            reorderingTable(index)
-        }
-
-        function reorderingTable(index) {
-            const rows = table.querySelector("tbody").querySelectorAll("tr")
-
-            for (let i = index; i < rows.length; i++) {
-                rows[i].querySelector(".no").innerText = rows[i].rowIndex
-            }
-
-        }
-
-        function totalPriceNoDiscount() {
-            const rows = table.querySelector('tbody').querySelectorAll('tr')
-
-            var sum = 0
-
-            for (const row of rows) {
-                if (row.querySelector(".select_code").innerText != "เลือกสินค้า") {
-                    const price = +row.querySelector('.item_price').innerText
-                    const amount = +row.querySelector('.item_quantity').value
-
-                    const total = price * amount
-
-                    sum += total
-                }
-            }
-
-            document.querySelector('#total_amount').value = sum
-        }
-
-        function totalPricePerOrder(event) {
-            const index = event.currentTarget.closest('tr').rowIndex
-
-            const row = table.querySelectorAll('tr')[index]
-
-            const price = +row.querySelector('.item_price').innerText
-            const amount = +row.querySelector('.item_quantity').value
-            const discount_percent = +row.querySelector('.item_discount_percent').value
-            let discount
-            if (discount_percent < 100) {
-                discount = (100 - discount_percent) / 100
-            }
-            else {
-                discount = (100 - 100) / 100
-            }
-
-            const total = price * amount * discount
-
-            row.querySelector('.item_total_amount').innerText = total
-        }
-
-        function totalDiscount() {
-            const rows = table.querySelector('tbody').querySelectorAll('tr')
-
-            var sum = 0
-
-            for (const row of rows) {
-                if (row.querySelector(".select_code").innerText != "เลือกสินค้า") {
-                    const price = +row.querySelector('.item_price').innerText
-                    const amount = +row.querySelector('.item_quantity').value
-                    let discount_percent = +row.querySelector('.item_discount_percent').value
-                    if (discount_percent >= 100) {
-                        discount_percent = 100
-                    }
-                    discount_percent /= 100
-
-                    const discount = price * amount * discount_percent
-
-                    sum += discount
-                }
-            }
-
-            document.querySelector('#total_discount_amount').value = sum
-        }
-
-        function discountPerOrder(event) {
-            const index = event.currentTarget.closest('tr').rowIndex
-
-            const row = table.querySelectorAll('tr')[index]
-
-            const price = +row.querySelector('.item_price').innerText
-            const amount = +row.querySelector('.item_quantity').value
-            let discount_percent = +row.querySelector('.item_discount_percent').value
-            if (discount_percent >= 100) {
-                discount_percent = 100
-            }
-            discount_percent /= 100
-
-            const discount = price * amount * discount_percent
-
-            row.querySelector('.item_discount_amount').innerText = discount
-        }
-
-        function subtotal() {
-            const total_price = +document.querySelector('#total_amount').value
-            const total_discount = +document.querySelector('#total_discount_amount').value
-
-            const subtotal = total_price - total_discount
-
-            document.querySelector('#subtotal').value =  subtotal
-        }
-
-        function grandTotal() {
-            const subtotal = +document.querySelector('#subtotal').value
-            let trade_discount = +document.querySelector('#trade_discount').value
-            if (trade_discount >= subtotal) {
-                trade_discount = subtotal
-            }
-
-            const grand_total = subtotal - trade_discount
-
-            document.querySelector('#grand_total').value = grand_total
-        }
-
-        async function saveOrder() {
-            const date = document.querySelector("#receipt_date").value
-            const total_amount = +document.querySelector("#total_amount").value
-            const total_discount_amount = +document.querySelector("#total_discount_amount").value
-            const subtotal = +document.querySelector("#subtotal").value
-            const trade_discount = +document.querySelector("#trade_discount").value
-            const grand_total = +document.querySelector("#grand_total").value
-
-            const orders = []
-            const rows = table.querySelector("tbody").querySelectorAll("tr")
-
-            for (const row of rows) {
-                if (row.querySelector(".select_code").innerText != "เลือกสินค้า") {
-                    const item_id = row.querySelector(".select_code").dataset.id
-                    const item_code = row.querySelector(".select_code").innerText
-                    const item_name = row.querySelector(".item_name").innerText
-                    const item_unit = row.querySelector(".item_unit").innerText
-                    const item_unit_id = row.querySelector(".item_unit").dataset.unit_id
-                    const item_quantity = +row.querySelector(".item_quantity").value
-                    const item_price = +row.querySelector(".item_price").innerText
-                    const item_discount_percent = +row.querySelector(".item_discount_percent").value
-                    const item_discount_amount = +row.querySelector(".item_discount_amount").innerText
-                    const item_total_amount = +row.querySelector(".item_total_amount").innerText
-
-                    const order = { 
-                        item_id: item_id,
-                        item_code: item_code,
-                        item_name: item_name,
-                        item_unit: item_unit,
-                        item_unit_id: item_unit_id,
-                        item_quantity: item_quantity,
-                        item_price: item_price,
-                        item_discount_percent: item_discount_percent,
-                        item_discount_amount: item_discount_amount,
-                        item_total_amount: item_total_amount,
-                    }
-
-                    orders.push(order)
-                }
-                
-            }
-
-            const newReceipt = { 
-                date: date, 
-                total_amount: total_amount,
-                total_discount_amount: total_discount_amount,
-                subtotal: subtotal,
-                trade_discount: trade_discount, 
-                grand_total: grand_total,
-                orders: orders
-            }
-
-            if (newReceipt != null) {
-                const response = await addReceipt(newReceipt)
-
-                if (response.code != 200) {
-                    alert(response.message)
-                    return
-                }
-
-                reset()
-            }
-
-        }
-
-        function appendPlaceholder() {
-            var newRow = document.createElement('tr')
-            var template = document.querySelector("#order_row_placeholder")
-            const index = table.rows.length
-
-            var clone = template.content.cloneNode(true)
-            clone.querySelector(".no").innerText = index
-            clone.querySelector(".select_code").addEventListener("click", openAddOrder)
-
-            newRow.append(clone)
-            newRow.dataset.index = index
-            table.querySelector("tbody").appendChild(newRow)
-        }
-
-        function setDate() {
-            var today = new Date()
-            var dd = today.getDate()
-            var mm = today.getMonth() + 1
-            var yyyy = today.getFullYear()
-
-            if (dd < 10) {
-                dd = "0" + dd
-            }
-
-            if (mm < 10) {
-                mm = "0" + mm
-            }
-
-            document.querySelector("#receipt_date").value = dd + "/" + mm + "/" +yyyy
-        }
-
-        function focusForm() {
-            document.body.style.backgroundColor = "lightgray"
-            document.body.querySelectorAll("#item_select, #item_select *").forEach(
-                elem => elem.style.backgroundColor = "white"
-            )
-            document.body.querySelectorAll("*:not(#item_select, #item_select *)").forEach(
-                elem => { 
-                    elem.style.pointerEvents = "none" 
-                    elem.style.opacity = 0.5
-                }
-            )
-        }
-
-        function unfocusForm() {
-            document.body.style.backgroundColor = "white"
-            document.body.querySelectorAll("*:not(#item_select, #item_select *)").forEach(
-                elem => { 
-                    elem.style.pointerEvents = "" 
-                    elem.style.opacity = 1
-                }
-            )
-        }
-
-        function reset() {
-            var rowLength = table.rows.length
-            for (var i = rowLength - 1; i > 0; i--) {
-                table.deleteRow(i)
-            }
-
-            appendPlaceholder()
-
-            document.querySelector("#total_amount").value = 0
-            document.querySelector("#total_discount_amount").value = 0
-            document.querySelector("#subtotal").value = 0
-            document.querySelector("#trade_discount").value = 0
-            document.querySelector("#grand_total").value = 0
-        }
-
-        appendPlaceholder()
-        setDate()
-    </script> -->
 
     <script type="module">
         import {
@@ -700,10 +246,10 @@
                 init: setItemList,
             }
         })()
-        // const modal = modal(document.getElementById("item_select"))
+
         modal.init(items)
 
-        let editTargetIndex;
+        let editTargetIndex
 
         function addOrder(item) {
             const lastRowIndex = table.querySelector("tbody").rows.length
@@ -788,7 +334,6 @@
             for (let i = index - 1; i < rows.length; i++) {
                 rows[i].querySelector(".no").innerText = rows[i].rowIndex
             }
-
         }
 
         function totalPriceNoDiscount() {
@@ -945,36 +490,29 @@
                 orders: orders
             }
 
-            if (newReceipt != null) {
-                const response = await addReceipt(newReceipt)
+            const response = await addReceipt(newReceipt)
 
-                // if (response.code != 200) {
-                //     alert(response.message)
-                //     return
-                // }
-
+            if (response.code != 200) {
                 alert(response.message)
-                if (response.code != 200) {
-                    return
+                return
+            }
+
+            reset()
+
+            function reset() {
+                const rows = table.querySelector("tbody").querySelectorAll("tr:not(#add_order_row)")
+
+                for (const row of rows) {
+                    row.remove()
                 }
 
-                reset()
+                reorderingTable(table.querySelector("#add_order_row").rowIndex)
 
-                function reset() {
-                    const rows = table.querySelector("tbody").querySelectorAll("tr:not(#add_order_row)")
-
-                    for (const row of rows) {
-                        row.remove()
-                    }
-
-                    reorderingTable(table.querySelector("#add_order_row").rowIndex)
-
-                    document.querySelector("#total_amount").value = 0
-                    document.querySelector("#total_discount_amount").value = 0
-                    document.querySelector("#subtotal").value = 0
-                    document.querySelector("#trade_discount").value = 0
-                    document.querySelector("#grand_total").value = 0
-                }
+                document.querySelector("#total_amount").value = 0
+                document.querySelector("#total_discount_amount").value = 0
+                document.querySelector("#subtotal").value = 0
+                document.querySelector("#trade_discount").value = 0
+                document.querySelector("#grand_total").value = 0
             }
         }
 

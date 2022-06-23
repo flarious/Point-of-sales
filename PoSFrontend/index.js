@@ -27,15 +27,17 @@ app.get("/PointOfSales/item", function(req, res) {
 })
 
 app.get("/PointOfSales/receipt", function(req, res) {
-    res.sendFile(path.join(__dirname + "/files" + "/receipt.html"))
+    if (req.query.receiptId) {
+        res.sendFile(path.join(__dirname + "/files" + "/receiptDetail.html"))
+    }
+    else {
+        res.sendFile(path.join(__dirname + "/files" + "/receipt.html"))
+    }
+    
 })
 
 app.get("/PointOfSales/pos", function(req, res) {
     res.sendFile(path.join(__dirname + "/files" + "/pos.html"))
-})
-
-app.get("/PointOfSales/receipt/:receiptId", function(req, res) {
-    res.sendFile(path.join(__dirname + "/files" + "/receiptDetail.html"))
 })
 
 

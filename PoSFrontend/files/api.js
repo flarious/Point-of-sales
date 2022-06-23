@@ -12,11 +12,11 @@ export async function getUnitsList() {
 }
 
 export async function addUnit(addValue) {
-    return await axios.post(`${endpointUnit}/create`, {name: addValue}).then(response => response.data)
+    return await axios.post(`${endpointUnit}/create`, addValue).then(response => response.data)
 }
 
 export async function editUnit(id, editValue) {
-    return await axios.put(`${endpointUnit}/update?id=${id}`, {name: editValue}).then(response => response.data)
+    return await axios.put(`${endpointUnit}/update?id=${id}`, editValue).then(response => response.data)
 }
 
 export async function deleteUnit(id) {

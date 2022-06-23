@@ -11,7 +11,9 @@
     <a href="/PointOfSales">กลับ</a>
     <h1>ตั้งค่าสินค้า</h1>
     <button id="add">เพิ่ม</button>
-    <div id="form" class="hide">
+    <item-form id="form" class="hide">
+    </item-form>
+    <!-- <div id="form" class="hide">
         <h1></h1>
         <label for="form_code">รหัสสินค้า</label>
         <input name="form_code" id="form_code"><br>
@@ -25,19 +27,24 @@
         </select><br>
         <button id="close">close</button><br>
         <button id="save">save changes</button>
-    </div>
+    </div> -->
     <template id="item_unit">
         <option class="option"></option>
     </template>
     <table id="item_table">
-        <tr>
-            <th>No.</th>
-            <th>รหัสสินค้า</th>
-            <th>ชื่อสินค้า</th>
-            <th>หน่วย</th>
-            <th>ราคา</th>
-            <th>ดำเนินการ</th>
-        </tr>
+        <thead>
+            <tr>
+                <th>No.</th>
+                <th>รหัสสินค้า</th>
+                <th>ชื่อสินค้า</th>
+                <th>หน่วย</th>
+                <th>ราคา</th>
+                <th>ดำเนินการ</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
     </table>
     <template id="item_row">
         <td class="no"></td>
@@ -51,7 +58,7 @@
         </td>     
     </template>
 
-    <!-- <script type="module">
+    <script type="module">
         import {
             getUnitsList,
             getItemsList,
@@ -60,200 +67,27 @@
             deleteItem,
         } from '../api.js'
 
-        const table = document.querySelector("#item_table")
-        const form = document.querySelector("#form")
-        const addButton = document.querySelector("#add")
+        import { reactive, effect, stop, ReactiveEffect } from 'https://unpkg.com/@vue/reactivity@3.2.20/dist/reactivity.esm-browser.js'
 
-        addButton.addEventListener("click", openAddForm)
-
-        const response = await getUnitsList()
-
-        if (response.code != 200) {
-            alert(response.message)
+        function watch(source, effect, immediate){
+            return watchMultiple([source], effect, immediate)
         }
 
-        const units = response.data
-        
-        for (const unit of units) {
-            var optionTemplate = document.querySelector("#item_unit")
-            var option = optionTemplate.content.cloneNode(true)
-            option.querySelector("option").value = unit.id
-            option.querySelector("option").text = unit.name
-
-            form.querySelector("#form_unit").appendChild(option)
+        function watchMultiple(sources, effect, immediate){
+            const reactiveEffect = new ReactiveEffect(() => {
+                for (const f of sources)
+                    f()
+            }, effect)
+            reactiveEffect.run()
+            if (immediate)
+                effect()
+            return () => reactiveEffect.stop()
         }
 
-        async function getTable() {
-            const response = await getItemsList()
-
-            if (response.code != 200) {
-                alert(response.message)
-                return
-            }
-
-            const items = response.data
-
-            for (const item of items) {
-                var newRow = document.createElement('tr')
-                var template = document.querySelector('#item_row')
-                const index = table.rows.length
-
-                var clone = template.content.cloneNode(true)
-                clone.querySelector(".no").innerText = index
-                clone.querySelector(".code").innerText = item.code
-                clone.querySelector(".name").innerText = item.name
-                clone.querySelector(".unit").innerText = item.unit
-                clone.querySelector(".price").innerText = item.price
-                clone.querySelector(".edit").addEventListener("click", openEditForm)
-                clone.querySelector(".delete").addEventListener("click", deleteData)
-
-                newRow.append(clone)
-                table.querySelector("tbody").appendChild(newRow)
-
-                async function openEditForm() {
-                    form.dataset.for = "Edit"
-                    form.classList.remove("hide")
-                    form.querySelector("h1").innerText = "แก้ไขสินค้า"
-                    form.querySelector("#form_code").value = item.code
-                    form.querySelector("#form_code").disabled = true
-                    form.querySelector("#form_name").value = item.name
-                    form.querySelector("#form_price").value = item.price
-                    form.querySelector("#form_unit").value = units.find(unit => unit.name == item.unit).id
-
-                    form.querySelector("#save").addEventListener("click", saveEditForm)
-                    form.querySelector("#close").addEventListener("click", closeEditForm)
-                    focusForm()
-                }
-
-                function closeEditForm() {
-                    form.classList.add("hide")
-                    form.querySelector("#save").removeEventListener("click", saveEditForm)
-                    form.querySelector("#close").removeEventListener("click", closeEditForm)
-                    unfocusForm()
-                }
-
-                function saveEditForm() {
-                    if (form.dataset.for == "Edit") {
-                        editData()
-                    }
-                }
-
-                async function editData() {
-                    const editName = form.querySelector("#form_name").value
-                    const editPrice = form.querySelector("#form_price").value
-                    const editUnit = form.querySelector("#form_unit").value
-                    const editValue = { name: editName, price: editPrice, unit_id: editUnit }
-                    if (editValue != null) {
-                        const response = await editItem(item.id, editValue)
-
-                        if (response.code != 200) {
-                            alert(response.message + response.data)
-                            return
-                        }
-
-                        clearTable()
-                        getTable()
-
-                        closeEditForm()
-                    }
-                }
-
-                async function deleteData() {
-                    await deleteItem(item.id)
-
-                    clearTable()
-                    getTable()
-                }
-            }
-        }
-
-        async function openAddForm() {
-            form.dataset.for = "Add"
-            form.classList.remove("hide")
-            form.querySelector("h1").innerText = "เพิ่มสินค้า"
-            form.querySelector("#form_code").value = ""
-            form.querySelector("#form_code").disabled = false
-            form.querySelector("#form_name").value = ""
-            form.querySelector("#form_price").value = ""
-            form.querySelector("#form_unit").value = ""
-
-            form.querySelector("#save").addEventListener("click", saveAddForm)
-            form.querySelector("#close").addEventListener("click", closeAddForm)
-            focusForm()
-        }
-
-        function closeAddForm() {
-            form.classList.add("hide")
-            form.querySelector("#save").removeEventListener("click", saveAddForm)
-            form.querySelector("#close").removeEventListener("click", closeAddForm)
-            unfocusForm()
-        }
-
-        function saveAddForm() {
-            if (form.dataset.for == "Add") {
-                addData()
-            }
-        }
-
-        async function addData() {
-            const newCode = form.querySelector("#form_code").value
-            const newName = form.querySelector("#form_name").value
-            const newPrice = +form.querySelector("#form_price").value
-            const newUnit = +form.querySelector("#form_unit").value
-            const newItem = { code: newCode, name: newName, price: newPrice, unit_id: newUnit }
-            if (newItem != null) {
-                const response = await addItem(newItem)
-
-                if (response.code != 200) {
-                    alert(response.message + response.data)
-                    return
-                }
-
-                clearTable()
-                getTable()
-
-                form.querySelector("#save").removeEventListener("click", saveAddForm)
-                closeAddForm()
-            }
-        }
-
-        function focusForm() {
-            document.body.style.backgroundColor = "lightgray"
-            document.body.querySelectorAll("#form, #form *").forEach(
-                elem => elem.style.backgroundColor = "white"
-            )
-            document.body.querySelectorAll("*:not(#form, #form *)").forEach(
-                elem => { 
-                    elem.style.pointerEvents = "none" 
-                    elem.style.opacity = 0.5
-                }
-            )
-        }
-
-        function unfocusForm() {
-            document.body.style.backgroundColor = "white"
-            document.body.querySelectorAll("*:not(#form, #form *)").forEach(
-                elem => { 
-                    elem.style.pointerEvents = "" 
-                    elem.style.opacity = 1
-                }
-            )
-        }
-
-        function clearTable() {
-            var rowLength = table.rows.length
-            for (var i = rowLength - 1; i > 0; i--) {
-                table.deleteRow(i)
-            }
-        }
-
-        getTable()
-    </script> -->
-
-    <script type="module">
         const table = document.querySelector("#item_table")
 
         document.querySelector("#add").addEventListener("click", function(event) {
+            // modal.classList.remove("hide")
             modal.open(event, addData)
         })
 
@@ -265,160 +99,229 @@
 
         const units = response.data
 
-        const modal = (function() {
-            const modalElement = document.querySelector("#form")
-            let _units
-            let _index
-            let _callback
-            let _item_code
-            let _item_name
-            let _item_price
-            let _item_unit_id
+        class ItemModal extends HTMLElement {
+            constructor() {
+                super();
 
-            modalElement.querySelector("#form_code").addEventListener("change", onItemCodeChange)
-            modalElement.querySelector("#form_name").addEventListener("change", onItemNameChange)
-            modalElement.querySelector("#form_price").addEventListener("change", onItemPriceChange)
-            modalElement.querySelector("#form_unit").addEventListener("change", onItemUnitChange)
-            modalElement.querySelector("#save").addEventListener("click", save)
-            modalElement.querySelector("#close").addEventListener("click", close)
+                this.attachShadow({ mode: 'open' });
+            }
 
-            function setUnitList(units) {
-                _units = units
-                for (const unit of _units) {
-                    var optionTemplate = document.querySelector("#item_unit")
-                    var option = optionTemplate.content.cloneNode(true)
-                    option.querySelector("option").value = unit.id
-                    option.querySelector("option").text = unit.name
+            setup(item, units) {
+                const html = `
+                <h1></h1>
+                <label for="form_code">รหัสสินค้า</label>
+                <input name="form_code" id="form_code"><br>
+                <label for="form_name">ชื่อสินค้า</label>
+                <input name="form_name" id="form_name"><br>
+                <label for="form_price">ราคา</label>
+                <input type="number" name="form_price" id="form_price"><br>
+                <label for="form_unit">หน่วย</label>
+                <select name="form_unit" id="form_unit">
+                    <option selected value="0">Please Select</option>
+                </select><br>
+                <button id="close">close</button><br>
+                <button id="save">save changes</button><br>
+                <button id="default">default</button>
+                `
 
-                    modalElement.querySelector("#form_unit").appendChild(option)
+                const container = document.createElement('div')
+                container.innerHTML = html
+                this.container = container
+
+                this.codeElement = container.querySelector("#form_code")
+                this.nameElement = container.querySelector("#form_name")
+                this.priceElement = container.querySelector("#form_price")
+                this.unitElement = container.querySelector("#form_unit")
+
+                const _item = reactive({...item})
+                this._item = _item
+                this._units = units
+
+                this.setUnitList()
+                
+                this.shadowRoot.appendChild(container);
+                
+                watch(() => _item.code, () => this.codeElement.value = _item.code ?? "")
+                watch(() => _item.name, () => this.nameElement.value = _item.name ?? "")
+                watch(() => _item.price, () => this.priceElement.value = _item.price ?? "")
+                watch(() => _item.unit_id, () => this.unitElement.value = _item.unit_id ?? "")
+
+                this.codeElement.addEventListener("change", this.onItemCodeChange.bind(this))
+                this.nameElement.addEventListener("change", this.onItemNameChange.bind(this))
+                this.priceElement.addEventListener("change", this.onItemPriceChange.bind(this))
+                this.unitElement.addEventListener("change", this.onItemUnitChange.bind(this))
+                container.querySelector("#save").addEventListener("click", this.save.bind(this))
+                container.querySelector("#close").addEventListener("click", this.close.bind(this))
+                container.querySelector("#default").addEventListener("click", this.default.bind(this))
+            } 
+
+            setUnitList() {
+                for (const unit of this._units) {
+                    var option = document.createElement("option")
+
+                    option.value = unit.id
+                    option.text = unit.name
+
+                    this.unitElement.appendChild(option)
                 }
             }
-
-            function onItemCodeChange(event) {
-                setItemCode(event.currentTarget.value)
+            
+            onItemCodeChange(event) {
+                this._item.code = event.currentTarget.value
             }
 
-            function onItemNameChange(event) {
-                setItemName(event.currentTarget.value)
+                
+            onItemNameChange(event) {
+                this._item.name = event.currentTarget.value
             }
 
-            function onItemPriceChange(event) {
-                setItemPrice(event.currentTarget.value)
+            
+            onItemPriceChange(event) {
+                this._item.price = event.currentTarget.value
             }
 
-            function onItemUnitChange(event) {
-                setItemUnit(event.currentTarget.value)
+            
+            onItemUnitChange(event) {
+                // this.setItemUnitId(event.currentTarget.value)
+                // this.setItemUnit(this._units.find(unit => unit.id == event.currentTarget.value).name)
+                this._item.unit_id = event.currentTarget.value
             }
-
-            function setItemCode(item_code) {
-                _item_code = item_code
+            
+            setEditForm() {
+                this.codeElement.disabled = true
+                this._item.code = this._row.querySelector(".code").innerText
+                this._item.name = this._row.querySelector(".name").innerText
+                this._item.price = this._row.querySelector(".price").innerText
+                // this._item.unit = row.querySelector(".unit").innerText
+                this._item.unit_id = this._row.querySelector(".unit").dataset.id
             }
-
-            function setItemName(item_name) {
-                _item_name = item_name
+            setAddForm() {
+                this.codeElement.disabled = false
+                this._item.code = ""
+                this._item.name = ""
+                this._item.price = 0
+                // this._item.unit = ""
+                this._item.unit_id = 0
             }
-
-            function setItemPrice(item_price) {
-                _item_price = item_price
-            }
-
-            function setItemUnit(item_unit_id) {
-                _item_unit_id = item_unit_id
-            }
-
-            function setFormItemCode() {
-                modalElement.querySelector("#form_code").value = _item.code
-            }
-
-            function setFormItemName() {
-                modalElement.querySelector("#form_name").value = _item_name
-            }
-
-            function setFormItemPrice() {
-                modalElement.querySelector("#form_price").value = _item_price
-            }
-
-            function setFormItemUnit() {
-                modalElement.querySelector("#form_unit").value = _item_unit_id
-            }
-
-            function setEditForm(row) {
-                setItemCode(row.querySelector(".code").innerText)
-                setItemName(row.querySelector(".name").innerText)
-                setItemPrice(row.querySelector(".pride").innerText)
-                setItemUnit(row.querySelector(".unit").innerText)
-                setFormItemCode()
-                setFormItemName()
-                setFormItemPrice()
-                setFormItemUnit()
-            }
-
-            function setAddForm() {
-                setItemCode(undefined)
-                setItemName(undefined)
-                setItemPrice(undefined)
-                setItemUnit(undefined)
-                setFormItemCode()
-                setFormItemName()
-                setFormItemPrice()
-                setFormItemUnit()
-            }
-
-            function open(event, onSaveCallBack) {
+            
+            open(event, onSaveCallBack) {
                 if (event.currentTarget.innerText == "แก้ไข") {
-                    setEditForm(event.currentTarget.closest("tr"))
+                    this._row = event.currentTarget.closest("tr")
+                    this._mode = "edit"
+                    this.setEditForm()
                 }
                 else {
-                    setAddForm()
+                    this._row = null
+                    this._mode = "add"
+                    this.setAddForm()
                 }
 
-                _callback = onSaveCallBack
+                this.callback = onSaveCallBack
+
+                this.classList.remove("hide")
+                this.focusForm()
             }
 
-            function save() {
-                close()
-                _item = getItem()
-                _callback(_item)
-            }            
-
-            return {
-                open: open,
-                init: setUnitList,
+            close() {
+                this.classList.add("hide")
+                this.unfocusForm()
             }
-        })()
-        modal.init(units)
+            
+            default() {
+                if (this._mode == "add") {
+                    this._item.code = ""
+                    this._item.name = ""
+                    this._item.price = 0
+                    // this._item.unit = ""
+                    this._item.unit_id = 0
+                }
+                else if (this._mode == "edit") {
+                    this._item.code = this._row.querySelector(".code").innerText
+                    this._item.name = this._row.querySelector(".name").innerText
+                    this._item.price = this._row.querySelector(".price").innerText
+                    // this._item.unit = row.querySelector(".unit").innerText
+                    this._item.unit_id = this._row.querySelector(".unit").dataset.id
+                }
+                
+            }
+
+            focusForm() {
+                document.body.style.backgroundColor = "lightgray"
+                // document.body.querySelectorAll("item-form, item-form *").forEach(
+                //     elem => elem.style.backgroundColor = "white"
+                // )
+                this.container.style.backgroundColor = "white"
+                document.body.querySelectorAll("*:not(item-form, item-form *)").forEach(
+                    elem => { 
+                        elem.style.pointerEvents = "none" 
+                        elem.style.opacity = 0.5
+                    }
+                )
+            }
+            unfocusForm() {
+                document.body.style.backgroundColor = "white"
+                document.body.querySelectorAll("*:not(item-form, item-form *)").forEach(
+                    elem => { 
+                        elem.style.pointerEvents = "" 
+                        elem.style.opacity = 1
+                    }
+                )
+            }
+            save(){
+                this.close()
+                this.callback(this._item)
+            }
+        }
+
+        customElements.define('item-form', ItemModal);
+
+        const modal = document.querySelector("#form")
+        modal.setup({
+                    code: "",
+                    name: "",
+                    price: 0,
+                    unit: "",
+                    unit_id: 0,
+                }, units)
+
+        let targetId
 
         async function addData(item) {
-            const newItem = { code: item._item_code, name: item._item_name, price: item._item_price, unit_id: item._item_unit_id }
-            if (newItem != null) {
-                const response = await addItem(newItem)
-
-                if (response.code != 200) {
-                    alert(response.message)
-                    return
-                }
-            }
-        }
-
-        async function editData(item) {
-            const editValue = { name: item._item_name, price: item._item_price, unit_id: item._item_unit_id }
-            if (editValue != null) {
-                const response = await editItem(item.id, editValue)
-
-                if (response.code != 200) {
-                    alert(response.message)
-                    return
-                }
-            }
-        }
-
-        async function deleteData(item) {
-            const response = await deleteItem(item.id)
+            const newItem = { code: item.code, name: item.name, price: item.price, unit_id: item.unit_id }
+            const response = await addItem(newItem)
 
             if (response.code != 200) {
                 alert(response.message)
                 return
             }
+
+            clearTable()
+            getTable() 
+        }
+
+        async function editData(item) {
+            const editValue = { name: item.name, price: item.price, unit_id: item.unit_id }
+            const response = await editItem(targetId, editValue)
+
+            if (response.code != 200) {
+                alert(response.message)
+                return
+            }
+
+            clearTable()
+            getTable()
+        }
+
+        async function deleteData() {
+            const response = await deleteItem(targetId)
+
+            if (response.code != 200) {
+                alert(response.message)
+                return
+            }
+
+            clearTable()
+            getTable()
         }
 
         async function getTable() {
@@ -434,22 +337,39 @@
             for (const item of items) {
                 var newRow = document.createElement('tr')
                 var template = document.querySelector('#item_row')
-                const index = table.rows.length
+                const index = table.querySelector("tbody").rows.length + 1
 
                 var clone = template.content.cloneNode(true)
                 clone.querySelector(".no").innerText = index
                 clone.querySelector(".code").innerText = item.code
                 clone.querySelector(".name").innerText = item.name
                 clone.querySelector(".unit").innerText = item.unit
+                clone.querySelector(".unit").dataset.id = item.unit_id
                 clone.querySelector(".price").innerText = item.price
-                clone.querySelector(".edit").addEventListener("click", openEditForm)
-                clone.querySelector(".delete").addEventListener("click", deleteData)
+                clone.querySelector(".edit").addEventListener("click", function(event) {
+                    modal.open(event, editData)
+                    targetId = item.id
+                })
+                clone.querySelector(".delete").addEventListener("click", function() {
+                    targetId = item.id
+                    deleteData()
+                })
 
                 newRow.append(clone)
+                newRow.dataset.id = item.id
                 table.querySelector("tbody").appendChild(newRow)
             }
         }
 
+        function clearTable() {
+            const rows = document.querySelector("tbody").querySelectorAll("tr")
+
+            for (const row of rows) {
+                row.remove()
+            }
+        }
+
+        getTable()
     </script>
 </body>
 </html>

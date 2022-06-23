@@ -37,6 +37,11 @@ namespace PoSBackend.Repositories
             {
                 try
                 {
+                    if (unit.Name == "")
+                    {
+                        throw new ArgumentException("Unit's name is empty");
+                    }
+
                     var isDuplicated = dbContext.units.Any(data => data.name == unit.Name);
 
                     if (isDuplicated)
@@ -44,10 +49,7 @@ namespace PoSBackend.Repositories
                         throw new ArgumentException("Unit duplicated");
                     }
 
-                    if (unit.Name == "")
-                    {
-                        throw new ArgumentException("Unit's name is empty");
-                    }
+
 
                     unit data = new unit
                     {
@@ -89,6 +91,11 @@ namespace PoSBackend.Repositories
             {
                 try
                 {
+                    if (unit.Name == "")
+                    {
+                        throw new ArgumentException("Unit's name is empty");
+                    }
+
                     var isDuplicated = dbContext.units.Any(data => data.id != id && data.name == unit.Name);
 
                     if (isDuplicated)

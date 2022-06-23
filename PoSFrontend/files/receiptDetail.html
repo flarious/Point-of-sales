@@ -60,9 +60,8 @@
 
         const table = document.querySelector("#order_table")
 
-        const currentUrl = window.location.href
-        const splittedUrl = currentUrl.split("/")
-        const id = splittedUrl[splittedUrl.length - 1]
+        const searchParams = new URLSearchParams(window.location.search)
+        const id = searchParams.get("receiptId")
         
         const response = await getOneReceipt(+id)
 

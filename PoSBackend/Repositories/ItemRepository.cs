@@ -43,13 +43,6 @@ namespace PoSBackend.Repositories
             {
                 try
                 {
-                    var isDuplicated = dbContext.items.Any(data => data.name == item.Name);
-
-                    if (isDuplicated)
-                    {
-                        throw new ArgumentException("Item duplicated");
-                    }
-
                     if (item.Code == "")
                     {
                         throw new ArgumentException("Item's code is empty");
@@ -63,6 +56,13 @@ namespace PoSBackend.Repositories
                     if (item.Unit_id == 0)
                     {
                         throw new ArgumentException("Item's unit is empty");
+                    }
+
+                    var isDuplicated = dbContext.items.Any(data => data.name == item.Name);
+
+                    if (isDuplicated)
+                    {
+                        throw new ArgumentException("Item duplicated");
                     }
 
                     item data = new item
@@ -113,6 +113,21 @@ namespace PoSBackend.Repositories
             {
                 try
                 {
+                    if (item.Code == "")
+                    {
+                        throw new ArgumentException("Item's code is empty");
+                    }
+
+                    if (item.Name == "")
+                    {
+                        throw new ArgumentException("Item's name is empty");
+                    }
+
+                    if (item.Unit_id == 0)
+                    {
+                        throw new ArgumentException("Item's unit is empty");
+                    }
+
                     var isDuplicated = dbContext.items.Any(data => data.id != id && data.name == item.Name);
 
                     if (isDuplicated)

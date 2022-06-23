@@ -306,6 +306,14 @@ namespace PoSBackend.Repositories
             {
                 try
                 {
+                    foreach (Order order in receipt.Orders)
+                    {
+                        if (order.Item_quantity == 0)
+                        {
+                            throw new ArgumentException("Item's quantity is empty");
+                        }
+                    }
+
                     var lastItem = dbContext.receipts.OrderByDescending(data => data.id).FirstOrDefault();
                     var newBillCode = "";
 
@@ -406,11 +414,6 @@ namespace PoSBackend.Repositories
 
                     foreach (Order order in receipt.Orders)
                     {
-                        if (order.Item_quantity == 0)
-                        {
-                            throw new ArgumentException("Items' quantity is empty");
-                        }
-
                         order newOrder = new order
                         {
                             receipt_id = newBillId,
