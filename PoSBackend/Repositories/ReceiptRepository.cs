@@ -119,11 +119,11 @@ namespace PoSBackend.Repositories
         {
             try
             {
-                DateOnly startDate = start == "NaN/NaN/NaN" ? DateOnly.MinValue : DateOnly.ParseExact(start, "dd/MM/yyyy", CultureInfo.InvariantCulture);
-                DateOnly endDate = end == "NaN/NaN/NaN" ? DateOnly.MaxValue : DateOnly.ParseExact(end, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                DateOnly? startDate = string.IsNullOrEmpty(start) ? null : DateOnly.ParseExact(start, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                DateOnly? endDate = string.IsNullOrEmpty(end) ? null : DateOnly.ParseExact(end, "dd/MM/yyyy", CultureInfo.InvariantCulture);
 
                 List<ReceiptViewModel> list = (from receipt in dbContext.receipts
-                                               where receipt.date >= startDate && receipt.date < endDate
+                                               where (startDate == null || receipt.date >= startDate ) && (endDate == null || receipt.date <= endDate)
                                                select new ReceiptViewModel
                                                {
                                                    Id = receipt.id,
@@ -189,13 +189,23 @@ namespace PoSBackend.Repositories
                                                }).FirstOrDefault();*/
 
                 
-                receipt receiptData = (from receipt in dbContext.receipts where receipt.id == id select receipt).FirstOrDefault();
-                List<order> ordersData = (from order in dbContext.orders where order.receipt_id == id select order).ToList();
+                receipt receiptData = (from receipt in dbContext.receipts where receipt.id == id select receipt).SingleOrDefault();
 
                 if (receiptData != null)
                 {
+                    List<order> ordersData = (from order in dbContext.orders where order.receipt_id == id select order).ToList();
                     ReceiptDetailViewModel receipt = new ReceiptDetailViewModel();
                     List<OrderViewModel> orders = new List<OrderViewModel>();
+
+                    receipt.Id = receiptData.id;
+                    receipt.Code = receiptData.code;
+                    receipt.Date = receiptData.date.ToString("dd/MM/yyyy");
+                    receipt.Total_amount = receiptData.total_amount;
+                    receipt.Total_discount_amount = receiptData.total_discount_amount;
+                    receipt.Subtotal = receiptData.subtotal;
+                    receipt.Trade_discount = receiptData.trade_discount;
+                    receipt.Grand_total = receiptData.grand_total;
+                    receipt.Orders = orders;
 
                     foreach (var order in ordersData)
                     {
@@ -213,19 +223,9 @@ namespace PoSBackend.Repositories
                         orders.Add(orderModel);
                     }
 
-                    receipt.Id = receiptData.id;
-                    receipt.Code = receiptData.code;
-                    receipt.Date = receiptData.date.ToString("dd/MM/yyyy");
-                    receipt.Total_amount = receiptData.total_amount;
-                    receipt.Total_discount_amount = receiptData.total_discount_amount;
-                    receipt.Subtotal = receiptData.subtotal;
-                    receipt.Trade_discount = receiptData.trade_discount;
-                    receipt.Grand_total = receiptData.grand_total;
-                    receipt.Orders = orders;
-
                     return new Response<ReceiptDetailViewModel>
                     {
-                        Code = 0,
+                        Code = 200,
                         Message = "Success",
                         Data = receipt,
                     };
@@ -283,11 +283,6 @@ namespace PoSBackend.Repositories
                 var code = 500;
                 var message = e.InnerException == null ? e.Message : e.InnerException.Message;
 
-                if (message.Contains("Cannot add or update a child row: a foreign key constraint fails"))
-                {
-                    message = "Unit used not exist";
-                }
-
                 return new Response<ReceiptDetailViewModel>
                 {
                     Code = code,
@@ -319,9 +314,15 @@ namespace PoSBackend.Repositories
 
                     if (lastItem != null)
                     {
-                        string[] codeSplitted = lastItem.code.Split(prefix);
+                        /*string[] codeSplitted = lastItem.code.Split(prefix);
 
                         string runningPart = codeSplitted[codeSplitted.Length - 1];
+
+                        int newRunningPart = Int32.Parse(runningPart) + 1;
+
+                        newBillCode = $"{prefix}{newRunningPart:D4}";*/
+
+                        string runningPart = lastItem.code.Substring(prefix.Length);
 
                         int newRunningPart = Int32.Parse(runningPart) + 1;
 
@@ -400,11 +401,11 @@ namespace PoSBackend.Repositories
                     {
                         code = newBillCode,
                         date = DateOnly.ParseExact(receipt.Date, "dd/MM/yyyy", CultureInfo.InvariantCulture),
-                        total_amount = receipt.Total_amount,
-                        total_discount_amount = receipt.Total_discount_amount,
-                        subtotal = receipt.Subtotal,
-                        trade_discount = receipt.Trade_discount,
-                        grand_total = receipt.Grand_total,
+                        total_amount = receipt.Total_amount.Value,
+                        total_discount_amount = receipt.Total_discount_amount.Value,
+                        subtotal = receipt.Subtotal.Value,
+                        trade_discount = receipt.Trade_discount.Value,
+                        grand_total = receipt.Grand_total.Value,
                     };
                     
                     dbContext.receipts.Add(bill);
@@ -417,16 +418,16 @@ namespace PoSBackend.Repositories
                         order newOrder = new order
                         {
                             receipt_id = newBillId,
-                            item_id = order.Item_id,
+                            item_id = order.Item_id.Value,
                             item_code = order.Item_code,
                             item_name = order.Item_name,
                             item_unit = order.Item_unit,
-                            unit_id = order.Item_unit_id,
-                            item_quantity = order.Item_quantity,
-                            item_price = order.Item_price,
-                            item_discount_percent = order.Item_discount_percent,
-                            item_discount_amount = order.Item_discount_amount,
-                            item_total_amount = order.Item_total_amount,
+                            unit_id = order.Item_unit_id.Value,
+                            item_quantity = order.Item_quantity.Value,
+                            item_price = order.Item_price.Value,
+                            item_discount_percent = order.Item_discount_percent.Value,
+                            item_discount_amount = order.Item_discount_amount.Value,
+                            item_total_amount = order.Item_total_amount.Value,
                         };
 
                         dbContext.orders.Add(newOrder);

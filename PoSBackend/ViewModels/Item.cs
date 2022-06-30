@@ -1,11 +1,17 @@
-﻿namespace PoSBackend.ViewModels
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace PoSBackend.ViewModels
 {
     public class Item
     {
+        [Required]
         public string Code { get; set; } = string.Empty;
+        [Required]
         public string Name { get; set; } = string.Empty;
-        public decimal Price { get; set; }
-        public int Unit_id { get; set; }
+        [Required]
+        public decimal? Price { get; set; }
+        [Required]
+        public int? Unit_id { get; set; }
     }
 
     public class ItemViewModel

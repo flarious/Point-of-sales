@@ -79,6 +79,12 @@ namespace PoSBackend.Context
 
                 entity.Property(e => e.item_unit).HasMaxLength(45);
 
+                entity.HasOne(d => d.item)
+                    .WithMany(p => p.orders)
+                    .HasForeignKey(d => d.item_id)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_order_item");
+
                 entity.HasOne(d => d.receipt)
                     .WithMany(p => p.orders)
                     .HasForeignKey(d => d.receipt_id)

@@ -1,0 +1,14 @@
+.modal {
+    color: black;
+    background-color: white;
+}
+
+.not_modal {
+    background-color: lightgray;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.selected {
+    color: blue;
+}

@@ -4,7 +4,7 @@ const endpoint = "http://localhost:50000"
 
 const endpointUnit = `${endpoint}/unit`
 const endpointItem = `${endpoint}/item`
-const endpointReceipt = `${endpoint}/receipt`
+const endpointReceipt = `${endpoint}/receipt`   
 
 export async function getUnitsList() {
     return await axios.get(`${endpointUnit}/findAll`).then(response => response.data)

@@ -4,6 +4,7 @@ using PoSBackend.ViewModels;
 
 namespace PoSBackend.Controllers
 {
+    [ApiController]
     [Route("[controller]/[action]")]
     public class ItemController : ControllerBase
     {
@@ -68,6 +69,7 @@ namespace PoSBackend.Controllers
         }
 
         [HttpPut]
+        [Route("{id}")]
         public IActionResult Update(int id, [FromBody] Item item)
         {
             /*var result = repository.Update(id, item);
@@ -101,6 +103,7 @@ namespace PoSBackend.Controllers
         }
 
         [HttpDelete]
+        [Route("{id}")]
         public IActionResult Delete(int id)
         {
             /*var result = repository.Delete(id);

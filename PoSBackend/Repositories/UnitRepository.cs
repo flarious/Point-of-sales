@@ -37,10 +37,10 @@ namespace PoSBackend.Repositories
             {
                 try
                 {
-                    if (unit.Name == "")
+                    /*if (string.IsNullOrEmpty(unit.Name))
                     {
                         throw new ArgumentException("Unit's name is empty");
-                    }
+                    }*/
 
                     var isDuplicated = dbContext.units.Any(data => data.name == unit.Name);
 
@@ -48,8 +48,6 @@ namespace PoSBackend.Repositories
                     {
                         throw new ArgumentException("Unit duplicated");
                     }
-
-
 
                     unit data = new unit
                     {
@@ -91,10 +89,10 @@ namespace PoSBackend.Repositories
             {
                 try
                 {
-                    if (unit.Name == "")
+                    /*if (string.IsNullOrEmpty(unit.Name))
                     {
                         throw new ArgumentException("Unit's name is empty");
-                    }
+                    }*/
 
                     var isDuplicated = dbContext.units.Any(data => data.id != id && data.name == unit.Name);
 
@@ -103,7 +101,7 @@ namespace PoSBackend.Repositories
                         throw new ArgumentException("Unit duplicated");
                     }
 
-                    var row = dbContext.units.FirstOrDefault(data => data.id == id);
+                    var row = dbContext.units.SingleOrDefault(data => data.id == id);
                     if (row != null)
                     {
                         row.name = unit.Name;
@@ -147,7 +145,15 @@ namespace PoSBackend.Repositories
             {
                 try
                 {
-                    var row = dbContext.units.FirstOrDefault(data => data.id == id);
+                    var isInUsed = dbContext.items.Any(data => data.unit == id);
+
+                    if (isInUsed)
+                    {
+                        throw new ArgumentException("Unit is already in used");
+                    }
+
+                    var row = dbContext.units.SingleOrDefault(data => data.id == id);
+
                     if (row != null)
                     {
                         dbContext.units.Remove(row);
@@ -175,10 +181,10 @@ namespace PoSBackend.Repositories
                     var code = 500;
                     var message = e.InnerException == null ? e.Message : e.InnerException.Message;
 
-                    if (message.Contains("Cannot delete or update a parent row: a foreign key constraint fails"))
+                    /*if (message.Contains("Cannot delete or update a parent row: a foreign key constraint fails"))
                     {
                         message = "Unit is already in used";
-                    }
+                    }*/
 
                     return new Response<UnitViewModel>
                     {

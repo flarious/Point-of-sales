@@ -43,12 +43,12 @@ namespace PoSBackend.Repositories
             {
                 try
                 {
-                    if (item.Code == "")
+                    /*if (item.Code == "" || item.Code == null)
                     {
                         throw new ArgumentException("Item's code is empty");
                     }
 
-                    if (item.Name == "")
+                    if (string.IsNullOrEmpty(item.Name))
                     {
                         throw new ArgumentException("Item's name is empty");
                     }
@@ -56,21 +56,28 @@ namespace PoSBackend.Repositories
                     if (item.Unit_id == 0)
                     {
                         throw new ArgumentException("Item's unit is empty");
-                    }
+                    }*/
 
-                    var isDuplicated = dbContext.items.Any(data => data.name == item.Name);
+                    var isDuplicated = dbContext.items.Any(data => data.code == item.Code);
 
                     if (isDuplicated)
                     {
                         throw new ArgumentException("Item duplicated");
                     }
 
+                    var isUnitExisted = dbContext.units.Any(data => data.id == item.Unit_id);
+
+                    if (!isUnitExisted)
+                    {
+                        throw new ArgumentException("Unit used not exist");
+                    }
+
                     item data = new item
                     {
                         code = item.Code,
                         name = item.Name,
-                        price = item.Price,
-                        unit = item.Unit_id,
+                        price = item.Price.Value,
+                        unit = item.Unit_id.Value,
                     };
 
                     dbContext.items.Add(data);
@@ -92,10 +99,10 @@ namespace PoSBackend.Repositories
                     var code = 500;
                     var message = e.InnerException == null ? e.Message : e.InnerException.Message;
 
-                    if (message.Contains("Cannot add or update a child row: a foreign key constraint fails"))
+                    /*if (message.Contains("Cannot add or update a child row: a foreign key constraint fails"))
                     {
                         message = "Unit used not exist";
-                    }
+                    }*/
 
                     return new Response<ItemViewModel>
                     {
@@ -128,19 +135,19 @@ namespace PoSBackend.Repositories
                         throw new ArgumentException("Item's unit is empty");
                     }
 
-                    var isDuplicated = dbContext.items.Any(data => data.id != id && data.name == item.Name);
+                    var isDuplicated = dbContext.items.Any(data => data.id != id && data.code == item.Code);
 
                     if (isDuplicated)
                     {
                         throw new ArgumentException("Item duplicated");
                     }
 
-                    var row = dbContext.items.FirstOrDefault(data => data.id == id);
+                    var row = dbContext.items.SingleOrDefault(data => data.id == id);
                     if (row != null)
                     {
                         row.name = item.Name;
-                        row.price = item.Price;
-                        row.unit = item.Unit_id;
+                        row.price = item.Price.Value;
+                        row.unit = item.Unit_id.Value;
 
                         dbContext.SaveChanges();
 
@@ -186,7 +193,7 @@ namespace PoSBackend.Repositories
             {
                 try
                 {
-                    var row = dbContext.items.FirstOrDefault(data => data.id == id);
+                    var row = dbContext.items.SingleOrDefault(data => data.id == id);
 
                     if (row != null)
                     {

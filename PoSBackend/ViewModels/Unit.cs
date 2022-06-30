@@ -1,8 +1,11 @@
-﻿namespace PoSBackend.ViewModels
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace PoSBackend.ViewModels
 {
     public class Unit
     {
-        public string Name { get; set; } = string.Empty;
+        [Required]
+        public string Name { get; set; }
     }
 
     public class UnitViewModel

@@ -4,6 +4,7 @@ using PoSBackend.ViewModels;
 
 namespace PoSBackend.Controllers
 {
+    /*[ApiController]*/
     [Route("[controller]/[action]")]
     public class ReceiptController : ControllerBase
     {
@@ -34,9 +35,9 @@ namespace PoSBackend.Controllers
         }
 
         [HttpGet]
-        public IActionResult FindByDateRange(string start, string end)
+        public IActionResult FindByDateRange([FromQuery] searchByDateParam param)
         {
-            var response = repository.FindByDateRange(start, end);
+            var response = repository.FindByDateRange(param.start, param.end);
 
             return Ok(response);
         }
@@ -106,4 +107,10 @@ namespace PoSBackend.Controllers
             return Ok(response);
         }
     }
+}
+
+public class searchByDateParam
+{
+    public string start { get; set; } = string.Empty;
+    public string end { get; set; } = string.Empty;
 }
