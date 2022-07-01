@@ -4,6 +4,7 @@
     </main>
 </template>
 
+<!--
 <script>
 import ReceiptDetail from '@/components/ReceiptDetail.vue'
 
@@ -13,4 +14,9 @@ export default {
         ReceiptDetail,
     }
 }
+</script>
+-->
+
+<script setup lang="ts">
+import ReceiptDetail from '@/components/ReceiptDetail.vue' 
 </script>

@@ -4,6 +4,7 @@
     </main>
 </template>
 
+<!--
 <script>
 import Item from '@/components/Item.vue'
 
@@ -13,4 +14,9 @@ export default {
         Item,
     }
 }
+</script>
+-->
+
+<script setup lang="ts">
+import Item from '@/components/Item.vue'
 </script>

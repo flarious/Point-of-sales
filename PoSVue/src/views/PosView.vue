@@ -4,6 +4,7 @@
     </main>
 </template>
 
+<!--
 <script>
 import Pos from '@/components/Pos.vue'
 
@@ -13,4 +14,9 @@ export default {
         Pos,
     }
 }
+</script>
+-->
+
+<script setup lang="ts">
+import Pos from '@/components/Pos.vue'
 </script>

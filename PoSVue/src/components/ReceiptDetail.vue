@@ -139,7 +139,7 @@ export default {
     <input v-model="state.receipt.grand_total" disabled type="number"><br>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { reactive } from 'vue'
 import { useRoute } from 'vue-router'
 import {
@@ -162,9 +162,9 @@ const state = reactive({
     },
 })
 
-getReceipt(route.params.id)
+getReceipt(+route.params.id)
 
-async function getReceipt(id) {
+async function getReceipt(id: number) {
     const response = await getOneReceipt(id)
 
     if (response.code != 200) {

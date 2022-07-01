@@ -110,7 +110,6 @@ export default {
                 orders: [],
             },
             isModalHidden: true,
-            isSelected: false,
             editTarget: undefined,
             selectedItem: {
                 item_id: 0,
@@ -124,7 +123,6 @@ export default {
                 item_discount_amount: 0,
                 item_total_amount: 0,
             },
-            items: [],
         }
     },
     methods: {
@@ -285,7 +283,6 @@ export default {
                 orders: [],
             }
             this.isModalHidden = true
-            this.isSelected = false
             this.editTarget = undefined
             this.selectedItem = {
                 item_id: 0,
@@ -323,7 +320,7 @@ export default {
     <label :class="{ not_modal: !state.isModalHidden }">วันที่</label>
     <input disabled v-model="state.receipt.date" :class="{ not_modal: !state.isModalHidden }"><br>
     <div v-show="!state.isModalHidden" :class="{ modal: !state.isModalHidden }">
-        <PosModal :showed="!state.isModalHidden" :item="state.selectedItem" @ModalClose="(state) => state.isModalHidden = state" @ModalSave="onModalSave">
+        <PosModal :showed="!state.isModalHidden" :item="state.selectedItem" @ModalClose="(isClose) => state.isModalHidden = isClose" @ModalSave="onModalSave">
         </PosModal>
     </div>
     <table :class="{ not_modal: !state.isModalHidden }">
@@ -401,15 +398,24 @@ export default {
     </div>
 </template>
 
-<script setup>
-import { reactive } from 'vue'
+<script setup lang="ts">
+import { reactive, ref } from 'vue'
 import {
     addReceipt,
 } from '../api/api.js'
+import type { OrderModel } from '@/interfaces/Order'
+import type { ReceiptModel } from '@/interfaces/Receipt'
 
 import PosModal from '@/components/PosModal.vue'
 
-const state = reactive({
+interface PoSComponentState {
+    receipt: ReceiptModel,
+    isModalHidden: boolean,
+    editTarget?: number,
+    selectedItem: OrderModel,
+}
+
+const state: PoSComponentState = reactive({
     receipt: {
         date: "",
         total_amount: 0,
@@ -420,7 +426,6 @@ const state = reactive({
         orders: [],
     },
     isModalHidden: true,
-    isSelected: false,
     editTarget: undefined,
     selectedItem: {
         item_id: 0,
@@ -434,30 +439,32 @@ const state = reactive({
         item_discount_amount: 0,
         item_total_amount: 0,
     },
-    items: [],
 })
+
+// let getEditTarget: number
+// getEditTarget = state.editTarget!
 
 setDate()
 
 function setDate() {
     var today = new Date()
-    var dd = today.getDate()
-    var mm = today.getMonth() + 1
-    var yyyy = today.getFullYear()
+    var dd = (today.getDate()).toString()
+    var mm = (today.getMonth() + 1).toString()
+    var yyyy = (today.getFullYear()).toString()
 
-    if (dd < 10) {
+    if (+dd < 10) {
         dd = "0" + dd
     }
 
-    if (mm < 10) {
+    if (+mm < 10) {
         mm = "0" + mm
     }
 
     state.receipt.date = dd + "/" + mm + "/" + yyyy
 }
 
-function onQuantityChange(index, quantity) {
-    state.receipt.orders[index].item_quantity = quantity
+function onQuantityChange(index: string, quantity: string) {
+    state.receipt.orders[+index].item_quantity = +quantity
 
     calcItemTotalAmount(index)
     calcItemDiscountAmount(index)
@@ -467,8 +474,8 @@ function onQuantityChange(index, quantity) {
     calcGrandTotal()
 }
 
-function onDiscountPercentChange(index, discount_percent) {
-    state.receipt.orders[index].item_discount_percent = discount_percent
+function onDiscountPercentChange(index: string, discount_percent: string) {
+    state.receipt.orders[+index].item_discount_percent = +discount_percent
     
     calcItemTotalAmount(index)
     calcItemDiscountAmount(index)
@@ -477,33 +484,33 @@ function onDiscountPercentChange(index, discount_percent) {
     calcGrandTotal()
 }
 
-function onTradeDiscountChange(discount) {
-    state.receipt.trade_discount = discount
+function onTradeDiscountChange(discount: string) {
+    state.receipt.trade_discount = +discount
 
     calcGrandTotal()
 }
 
-function calcItemTotalAmount(index) {
+function calcItemTotalAmount(index: string) {
     let discount_percent
-    if (state.receipt.orders[index].item_discount_percent > 100 ){
+    if (state.receipt.orders[+index].item_discount_percent > 100 ){
         discount_percent = 100
     }
     else {
-        discount_percent = state.receipt.orders[index].item_discount_percent
+        discount_percent = state.receipt.orders[+index].item_discount_percent
     }
 
-    state.receipt.orders[index].item_total_amount = state.receipt.orders[index].item_price * state.receipt.orders[index].item_quantity * (1 - (discount_percent / 100))
+    state.receipt.orders[+index].item_total_amount = state.receipt.orders[+index].item_price * state.receipt.orders[+index].item_quantity * (1 - (discount_percent / 100))
 }
 
-function calcItemDiscountAmount(index) {
+function calcItemDiscountAmount(index: string) {
     let discount_percent
-    if (state.receipt.orders[index].item_discount_percent > 100 ){
+    if (state.receipt.orders[+index].item_discount_percent > 100 ){
         discount_percent = 100
     }
     else {
-        discount_percent = state.receipt.orders[index].item_discount_percent
+        discount_percent = state.receipt.orders[+index].item_discount_percent
     }
-    state.receipt.orders[index].item_discount_amount = state.receipt.orders[index].item_price * state.receipt.orders[index].item_quantity * (discount_percent / 100)
+    state.receipt.orders[+index].item_discount_amount = state.receipt.orders[+index].item_price * state.receipt.orders[+index].item_quantity * (discount_percent / 100)
 }
 
 function calcTotalAmount() {
@@ -563,7 +570,7 @@ function openAdd() {
     state.editTarget = undefined
 }
 
-function openEdit(index, order) {
+function openEdit(index: string, order: OrderModel) {
     state.isModalHidden = false
     document.body.style.backgroundColor = "lightgray"
 
@@ -573,9 +580,9 @@ function openEdit(index, order) {
     state.selectedItem.item_price = order.item_price
     state.selectedItem.item_unit = order.item_unit
     state.selectedItem.item_unit_id = order.item_unit_id
-    state.editTarget = index
+    state.editTarget = +index
 }
-function onModalSave(selectedItem) {
+function onModalSave(selectedItem: OrderModel) {
     if (state.editTarget != undefined) {
         state.receipt.orders[state.editTarget] = {...selectedItem}
     }
@@ -585,8 +592,8 @@ function onModalSave(selectedItem) {
 
     reCalcReceiptSummary()
 }
-function onDelete(index) {
-    state.receipt.orders.splice(index, 1)
+function onDelete(index: string) {
+    state.receipt.orders.splice(+index, 1)
 
     reCalcReceiptSummary()
 }
@@ -608,7 +615,6 @@ async function onSubmit() {
         orders: [],
     }
     state.isModalHidden = true
-    state.isSelected = false
     state.editTarget = undefined
     state.selectedItem = {
         item_id: 0,

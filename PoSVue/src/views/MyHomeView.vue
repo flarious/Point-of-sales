@@ -14,8 +14,5 @@
     
 </template>
 
-<script>
-export default {
-    name: 'home'
-}
+<script setup lang="ts">
 </script>

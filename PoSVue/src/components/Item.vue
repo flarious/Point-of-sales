@@ -81,7 +81,7 @@ export default {
 
             this.item.code = ""
             this.item.name = ""
-            this.item.price = ""
+            this.item.price = 0
             this.item.unit_id = 0
             this.editTarget = undefined
         },
@@ -157,16 +157,25 @@ export default {
     </table>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { reactive } from 'vue'
 import {
     getItemsList,
     deleteItem,
 } from '../api/api.js'
+import type { Item, ItemModel } from '../interfaces/Item' 
 
 import ItemModal from '@/components/ItemModal.vue'
 
-const state = reactive({
+interface ItemComponentState {
+    item: ItemModel,
+    mode: string,
+    editTarget?: number,
+    isModalHidden: boolean,
+    items: Item[],
+}
+
+const state: ItemComponentState = reactive({
     item: {
         code: "",
         name: "",
@@ -199,12 +208,12 @@ function onAdd() {
 
     state.item.code = ""
     state.item.name = ""
-    state.item.price = ""
+    state.item.price = 0
     state.item.unit_id = 0
     state.editTarget = undefined
 }
 
-function onEdit(item) {
+function onEdit(item: Item) {
     state.mode = "แก้ไขสินค้า"
     state.isModalHidden = false
     document.body.style.backgroundColor = "lightgray"
@@ -216,7 +225,7 @@ function onEdit(item) {
     state.editTarget = item.id
 }
 
-async function onDelete(item) {
+async function onDelete(item: Item) {
     const response = await deleteItem(item.id)
 
     if (response.code != 200) {
@@ -224,7 +233,7 @@ async function onDelete(item) {
         return
     }
 
-    await this.getItems()
+    await getItems()
 }
 </script>
 

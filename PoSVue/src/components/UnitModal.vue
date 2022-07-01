@@ -74,7 +74,7 @@ export default {
     <button @click="onSave">save changes</button>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { reactive } from 'vue'
 import {
     addUnit,
@@ -93,11 +93,9 @@ const props = defineProps({
     },
     unit: {
         type: Object,
-        default(raw) {
-            return {
+        default: () => ({
                 name: "",
-            }
-        }
+        })
     },
 })
 

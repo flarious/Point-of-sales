@@ -122,21 +122,23 @@ export default {
     <button @click="onSave">save changes</button>
 </template>
 
-<script>
-import { reactive } from '@vue/reactivity'
+<script lang="ts">
+import { reactive, defineComponent } from 'vue'
 import {
     getItemsList,
 } from '../api/api.js'
+import type { Item } from '@/interfaces/Item.js'
+import type { PropType } from 'vue'
+import type { OrderModel } from '@/interfaces/Order.js'
 
-export default {
+export default defineComponent({
     props: {
         showed: {
             type: Boolean,
         },
         item: {
-            type: Object,
-            default(raw) {
-                return {
+            type: Object as PropType<OrderModel>,
+            default: () => ({
                     item_id: 0,
                     item_code: "",
                     item_name: "",
@@ -147,8 +149,7 @@ export default {
                     item_discount_percent: 0,
                     item_discount_amount: 0,
                     item_total_amount: 0,
-                }
-            }
+            })
         },
     },
     emits: {
@@ -161,6 +162,8 @@ export default {
             items: [],
         })
 
+        getItems()
+
         async function getItems() {
             const response = await getItemsList()
 
@@ -172,7 +175,7 @@ export default {
             state.items = response.data
         }
 
-        function selectItem(item) {
+        function selectItem(item: Item) {
             state.modalItem.item_id = item.id
             state.modalItem.item_code = item.code
             state.modalItem.item_name = item.name
@@ -199,7 +202,7 @@ export default {
             onSave,
         }
     },
-}  
+})
 </script>
 
 <style scoped>

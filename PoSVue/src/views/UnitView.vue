@@ -4,6 +4,7 @@
     </main>
 </template>
 
+<!--
 <script>
 import Unit from '@/components/Unit.vue'
 
@@ -13,4 +14,9 @@ export default {
         Unit,
     }
 }
+</script>
+-->
+
+<script setup lang="ts">
+import Unit from '@/components/Unit.vue'
 </script>

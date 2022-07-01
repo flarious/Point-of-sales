@@ -113,7 +113,7 @@ export default {
 <template>
     <h1>{{ mode }}</h1>
     <label for="form_code">รหัสสินค้า</label>
-    <input name="form_code" v-model="modalItem.code"><br>
+    <input :disabled="mode == 'แก้ไขสินค้า'" name="form_code" v-model="modalItem.code"><br>
     <label for="form_name">ชื่อสินค้า</label>
     <input name="form_name" v-model="modalItem.name"><br>
     <label for="form_price">ราคา</label>
@@ -128,7 +128,7 @@ export default {
     <button @click="defaultModal">default</button>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { watch, ref } from 'vue'
 import {
     getUnitsList,
@@ -148,14 +148,12 @@ const props = defineProps({
     },
     item: {
         type: Object,
-        default(raw) {
-            return {
+        default: () => ({
                 code: "",
                 name: "",
                 price: 0,
                 unit_id: 0,
-            }
-        }
+        })
     }
 })
 

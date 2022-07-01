@@ -128,12 +128,13 @@ export default {
     </table>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { reactive } from 'vue'
 import { 
     getReceiptsList,
     getReceiptByDate, 
 } from '../api/api.js'
+import type { Receipt } from '../interfaces/Receipt'
 
 const state = reactive({
     receipts: [],
@@ -165,7 +166,7 @@ async function filterReceipts() {
     state.receipts = response.data
 }
 
-function yyyyMMddToddMMyyyy(yyyyMMdd) {
+function yyyyMMddToddMMyyyy(yyyyMMdd: string) {
     if (yyyyMMdd != "") {
         let split = yyyyMMdd.split("-")
         let ddMMyyyy = `${split[2]}/${split[1]}/${split[0]}`
@@ -176,7 +177,7 @@ function yyyyMMddToddMMyyyy(yyyyMMdd) {
     }
 }
 
-function viewReceipt(receipt) {
+function viewReceipt(receipt: Receipt) {
     window.location.href = `/receipt/${receipt.id}`
 }
 </script>

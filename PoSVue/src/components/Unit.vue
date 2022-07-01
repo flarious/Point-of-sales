@@ -134,16 +134,25 @@ export default {
     </table>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { reactive } from 'vue'
 import {
     getUnitsList,
     deleteUnit,
 } from '../api/api.js'
+import type { Unit, UnitModel } from '../interfaces/Unit' 
 
 import UnitModal from '@/components/UnitModal.vue'
 
-const state = reactive({
+interface UnitComponentState {
+    unit: UnitModel,
+    mode: string,
+    editTarget?: number,
+    isModalHidden: boolean,
+    units: Unit[],
+}
+
+const state: UnitComponentState = reactive({
     unit: {
         name: "",
     },
@@ -175,7 +184,7 @@ function onAdd() {
     state.editTarget = undefined
 }
 
-function onEdit(unit) {
+function onEdit(unit: Unit) {
     state.mode = "แก้ไขหน่วยนับ"
     state.isModalHidden = false
     document.body.style.backgroundColor = "lightgray"
@@ -184,7 +193,7 @@ function onEdit(unit) {
     state.editTarget = unit.id
 }
 
-async function onDelete(unit) {
+async function onDelete(unit: Unit) {
     const response = await deleteUnit(unit.id)
 
     if (response.code != 200) {
