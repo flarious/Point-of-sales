@@ -1,27 +1,28 @@
 <script setup lang="ts">
+import { ref, inject, computed } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from '@/components/HelloWorld.vue'
+import type { GlobalState } from './interfaces/State'
+
+const state = inject("state") as GlobalState
+const isModalHidden = computed(() => state.isModalHidden)
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
+  <header :class="{ not_modal : !isModalHidden }">
+    <nav>
+        <button><router-link v-bind:to="{name: 'unit'}">ตั้งค่าหน่วยนับ</router-link></button>
+        <button><router-link v-bind:to="{name: 'item'}">ตั้งค่าสินค้า</router-link></button>
+        <button><router-link v-bind:to="{name: 'receipt'}">ดูใบเสร็จรับเงิน</router-link></button>
+        <button><router-link v-bind:to="{name: 'pos'}">ออกใบเสร็จรับเงิน</router-link></button>
+    </nav>
   </header>
 
-  <RouterView />
+  <router-view />
 </template>
 
 <style>
 @import '@/assets/base.css';
+@import '@/assets/modal.css';
 
 #app {
   max-width: 1280px;
