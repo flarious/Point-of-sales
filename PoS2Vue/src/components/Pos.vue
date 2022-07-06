@@ -7,12 +7,24 @@
         <input disabled v-model="state.receipt.date"><br>
     </div>
     <div v-show="!state.isModalHidden" :class="{ modal: !state.isModalHidden }">
-        <PosModal :item="state.selectedItem" @ModalClose="onClose" @ModalSave="onModalSave">
-        </PosModal>
+        <!-- <PosModal :item="state.selectedItem" @ModalClose="onClose" @ModalSave="onModalSave">
+        </PosModal> -->
+        <Modal :modalFor="'form'" @ModalClose="onClose">
+            <template v-slot:form>
+                <PosForm :item="state.selectedItem" @submitted="onModalSave">
+                </PosForm>
+            </template>
+        </Modal>
     </div>
     <div v-show="!state.isPreviewHidden" :class="{ modal: !state.isPreviewHidden}">
-        <ReceiptDetailModal :receipt="state.receipt" @ModalClose="onClose">
-        </ReceiptDetailModal>
+        <!-- <ReceiptDetailModal :receipt="state.receipt" @ModalClose="onClose">
+        </ReceiptDetailModal> -->
+        <Modal :modalFor="'detail'" @ModalClose="onClose">
+            <template v-slot:detail>
+                <ReceiptDetailTable :receipt="state.receipt">
+                </ReceiptDetailTable>
+            </template>
+        </Modal>
     </div>
     <table :class="{ not_modal: !isModalHidden }">
         <thead>
@@ -100,6 +112,9 @@ import type { GlobalState, PoSState } from '@/interfaces/State'
 
 import PosModal from '@/components/PosModal.vue'
 import ReceiptDetailModal from '../components/ReceiptDetailModal.vue'
+import Modal from '@/components/Modal.vue'
+import PosForm from '@/components/PosForm.vue'
+import ReceiptDetailTable from '@/components/ReceiptDetailTable.vue'
 
 const globalState = inject("state") as GlobalState
 const isModalHidden = computed(() => globalState.isModalHidden)
@@ -305,10 +320,10 @@ function onPreview() {
 }
 
 function onClose(closeFrom: string) {
-    if (closeFrom == "modal") {
+    if (closeFrom == "form") {
         state.isModalHidden = true
     }
-    else if (closeFrom == "preview") {
+    else if (closeFrom == "detail") {
         state.isPreviewHidden = true
     }
 

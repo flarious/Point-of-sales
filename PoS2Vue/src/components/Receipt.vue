@@ -8,8 +8,14 @@
         <button @click="filterReceipts">ค้นหา</button>
     </div>
     <div v-show="!isModalHidden" :class="{ modal: !isModalHidden }">
-        <ReceiptDetailModal :receiptId="state.receiptId" @ModalClose="onClose">
-        </ReceiptDetailModal>
+        <!-- <ReceiptDetailModal :receiptId="state.receiptId" @ModalClose="onClose">
+        </ReceiptDetailModal> -->
+        <Modal :modalFor="'detail'" @ModalClose="onClose">
+            <template v-slot:detail>
+                <ReceiptDetailTable :receiptId="state.receiptId">
+                </ReceiptDetailTable>
+            </template>
+        </Modal>
     </div>
     <table :class="{ not_modal: !isModalHidden }">
         <thead>
@@ -45,6 +51,8 @@ import type { Receipt } from '../interfaces/Receipt'
 import type { GlobalState, ReceiptState } from '../interfaces/State'
 
 import ReceiptDetailModal from '../components/ReceiptDetailModal.vue'
+import Modal from '@/components/Modal.vue'
+import ReceiptDetailTable from '@/components/ReceiptDetailTable.vue'
 
 const globalState = inject("state") as GlobalState
 const isModalHidden = computed(() => globalState.isModalHidden)

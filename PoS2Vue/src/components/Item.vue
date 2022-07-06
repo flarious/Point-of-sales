@@ -4,8 +4,14 @@
         <button @click="onAdd">เพิ่ม</button>
     </div>
     <div v-show="!isModalHidden" :class="{ modal: !isModalHidden }">
-        <ItemModal :mode="state.mode" :editTarget="state.editTarget" :item="state.item" @ModalClose="onClose" @ModalSave="getItems">
-        </ItemModal>
+        <!-- <ItemModal :mode="state.mode" :editTarget="state.editTarget" :item="state.item" @ModalClose="onClose" @ModalSave="getItems">
+        </ItemModal> -->
+        <Modal :modalFor="'form_default'" @ModalClose="onClose">
+            <template v-slot:form_default>
+                <ItemForm :mode="state.mode" :item="state.item" :editTarget="state.editTarget" @submitted="getItems">
+                </ItemForm>
+            </template>
+        </Modal>
     </div>
     <table :class="{ not_modal: !isModalHidden }">
         <tr>
@@ -29,7 +35,7 @@
             </td>
             <td>
                 <DataCard :dataLength="state.items.length" :selectedIndex="state.currentUnitIndex" 
-                @onIndexChange="(newIndex) => selectItem(newIndex)" @onCardEditPressed="onEdit(state.items[state.currentUnitIndex])" 
+                @update:selectedIndex="newIndex => selectItem(newIndex)" @onCardEditPressed="onEdit(state.items[state.currentUnitIndex])" 
                 @onCardDeletePressed="onDelete(state.items[state.currentUnitIndex])">
                     <template v-slot:detail>
                         <ItemDetail :object="state.currentUnitIndex != undefined ? state.items[state.currentUnitIndex] : undefined">
@@ -42,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, reactive } from 'vue'
+import { computed, inject, reactive, ref } from 'vue'
 import {
     getItemsList,
     deleteItem,
@@ -53,6 +59,8 @@ import type { GlobalState, ItemState } from '../interfaces/State'
 import ItemModal from '@/components/ItemModal.vue'
 import DataCard from '@/components/DataCard.vue'
 import ItemDetail from '@/components/ItemDetail.vue'
+import Modal from '@/components/Modal.vue'
+import ItemForm from '@/components/ItemForm.vue'
 
 const globalState = inject("state") as GlobalState
 const isModalHidden = computed(() => globalState.isModalHidden)
@@ -69,6 +77,9 @@ const state: ItemState = reactive({
     currentUnitIndex: undefined,
     items: [],
 })
+
+const shouldResetModal = ref(false)
+const shouldSubmitModal = ref(false)
 
 getItems()
 

@@ -1,15 +1,15 @@
 <template>
-    <button @click="previous" :disabled="state.currentUnitIndex == undefined || state.currentUnitIndex <= 0">&lt;</button>
+    <button @click="previous" :disabled="selectedIndex == undefined || selectedIndex <= 0">&lt;</button>
     <div>
         <slot name="detail"></slot>
-        <button @click="onEdit" :disabled="state.currentUnitIndex == undefined">แก้ไข</button>
-        <button @click="onDelete" :disabled="state.currentUnitIndex == undefined">ลบ</button>
+        <button @click="onEdit" :disabled="selectedIndex == undefined">แก้ไข</button>
+        <button @click="onDelete" :disabled="selectedIndex == undefined">ลบ</button>
     </div>
-    <button @click="next" :disabled="state.currentUnitIndex == undefined || state.currentUnitIndex + 1 >= dataLength">&gt;</button>
+    <button @click="next" :disabled="selectedIndex == undefined || selectedIndex + 1 >= dataLength">&gt;</button>
 </template>
 
 <script setup lang="ts">
-import { reactive, watch } from 'vue'
+import { computed } from 'vue'
 
 const props = defineProps({
     dataLength: {
@@ -20,46 +20,34 @@ const props = defineProps({
     }
 })
 
-watch(
-    () => props.selectedIndex,
-    () => {
-        state.currentUnitIndex = props.selectedIndex
-    }
-)
-
-const emits = defineEmits({
-    onIndexChange: null,
+const emit = defineEmits({
     onCardEditPressed: null,
-    onCardDeletePressed: null
+    onCardDeletePressed: null,
+    'update:selectedIndex': null,
 })
 
-interface DataCardState {
-    currentUnitIndex?: number,
-}
-
-const state: DataCardState = reactive({
-    currentUnitIndex: props.selectedIndex,
+const index = computed({
+    get(): number | undefined{
+        return props.selectedIndex 
+    },
+    set(value?: number) {
+        emit("update:selectedIndex", value)
+    }
 })
-
-function onIndexChange(index: number) {
-    emits("onIndexChange", index)
-}
 
 function previous() {
-    state.currentUnitIndex! -= 1
-    onIndexChange(state.currentUnitIndex!)
+    index.value = index.value! - 1
 }
 
 function next() {
-    state.currentUnitIndex! += 1
-    onIndexChange(state.currentUnitIndex!)
+    index.value = index.value! + 1
 }
 
 function onEdit() {
-    emits("onCardEditPressed")
+    emit("onCardEditPressed")
 }
 
 function onDelete() {
-    emits("onCardDeletePressed")
+    emit("onCardDeletePressed")
 }
 </script>

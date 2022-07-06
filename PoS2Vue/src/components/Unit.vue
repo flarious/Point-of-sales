@@ -4,8 +4,14 @@
         <button @click="onAdd">เพิ่ม</button>
     </div>
     <div v-show="!isModalHidden" :class="{ modal: !isModalHidden }">
-        <UnitModal :mode="state.mode" :editTarget="state.editTarget" :unit="state.unit" @ModalClose="onClose" @ModalSave="getUnits">
-        </UnitModal>
+        <!-- <UnitModal :mode="state.mode" :editTarget="state.editTarget" :unit="state.unit" @ModalClose="onClose" @ModalSave="getUnits">
+        </UnitModal> -->
+        <Modal :modalFor="'form'" @ModalClose="onClose">
+            <template v-slot:form>
+                <UnitForm :mode="state.mode" :editTarget="state.editTarget" :unit="state.unit" @submitted="getUnits">
+                </UnitForm>
+            </template>
+        </Modal>
     </div>
     <table :class="{ not_modal: !isModalHidden }"> 
         <tr>
@@ -27,7 +33,7 @@
             </td>
             <td>
                 <DataCard :dataLength="state.units.length" :selectedIndex="state.currentUnitIndex" 
-                @onIndexChange="(newIndex) => selectItem(newIndex)" @onCardEditPressed="onEdit(state.units[state.currentUnitIndex])" 
+                @update:selectedIndex="newIndex => selectItem(newIndex)" @onCardEditPressed="onEdit(state.units[state.currentUnitIndex])" 
                 @onCardDeletePressed="onDelete(state.units[state.currentUnitIndex])">
                     <template v-slot:detail>
                         <UnitDetail :object="state.currentUnitIndex != undefined ? state.units[state.currentUnitIndex] : undefined">
@@ -52,6 +58,8 @@ import type { UnitState, GlobalState } from '../interfaces/State'
 import UnitModal from '@/components/UnitModal.vue'
 import DataCard from '@/components/DataCard.vue'
 import UnitDetail from '@/components/UnitDetail.vue'
+import Modal from '@/components/Modal.vue'
+import UnitForm from '@/components/UnitForm.vue'
 
 const globalState = inject("state") as GlobalState
 const isModalHidden = computed(() => globalState.isModalHidden)
