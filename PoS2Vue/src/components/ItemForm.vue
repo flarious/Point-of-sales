@@ -20,15 +20,18 @@ import {
     getUnitsList,
     addItem,
     editItem,
-} from '../api/api.js'
+} from '@/api/api'
 import { modalActionState } from '@/states/modal'
+import type { ItemModel } from '@/interfaces/Item'
+import type { PropType } from 'vue'
+import type { Unit } from '@/interfaces/Unit'
 
 const props = defineProps({
     mode: {
         type: String,
     },
     item: {
-        type: Object,
+        type: Object as PropType<ItemModel>,
         default: () => ({
                 code: "",
                 name: "",
@@ -57,19 +60,18 @@ watch(
 )
 
 watch(
-    () => modalActionState.shouldResetModal,
-    () => {
-        if(modalActionState.shouldResetModal) {
+    () => modalActionState.resetModalCounter,
+    (newValue, oldValue) => {
+        if(newValue > oldValue) {
             modalItem.value = {...props.item}
-            modalActionState.resetted()
         }
     }
 )
 
 watch(
-    () => modalActionState.shouldSubmitModal,
-    async () => {
-        if(modalActionState.shouldSubmitModal) {
+    () => modalActionState.submitModalCounter,
+    async (newValue, oldValue) => {
+        if(newValue > oldValue) {
             var response
             if (props.editTarget != undefined) {
                 response = await editItem(props.editTarget, modalItem.value)
@@ -83,14 +85,13 @@ watch(
                 return
             }
 
-            modalActionState.submitted()
             emit("submitted")
         }
     }
 )
 
 let modalItem = ref({...props.item})
-let units = ref([])
+let units = ref<Unit[]>([])
 
 getUnits()
 

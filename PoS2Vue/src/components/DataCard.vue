@@ -1,11 +1,11 @@
 <template>
-    <button @click="previous" :disabled="selectedIndex == undefined || selectedIndex <= 0">&lt;</button>
+    <button @click="previous" :disabled="index == undefined || index <= 0">&lt;</button>
     <div>
         <slot name="detail"></slot>
-        <button @click="onEdit" :disabled="selectedIndex == undefined">แก้ไข</button>
-        <button @click="onDelete" :disabled="selectedIndex == undefined">ลบ</button>
+        <button @click="onEdit" :disabled="index == undefined">แก้ไข</button>
+        <button @click="onDelete" :disabled="index == undefined">ลบ</button>
     </div>
-    <button @click="next" :disabled="selectedIndex == undefined || selectedIndex + 1 >= dataLength">&gt;</button>
+    <button @click="next" :disabled="index == undefined || index + 1 >= dataLength">&gt;</button>
 </template>
 
 <script setup lang="ts">

@@ -1,30 +1,20 @@
 <template>
     <h1>Unit detail</h1>
     <h3>ชื่อหน่วย</h3>
-    <p>{{ state.data.name }}</p>
+    <p>{{ object.name }}</p>
 </template>
 
 <script setup lang="ts">
-import { reactive, watch } from "vue"
+import type { UnitModel } from "@/interfaces/Unit"
+import type { PropType } from "vue"
 
 const props = defineProps({
     object: {
-        type: Object,
+        type: Object as PropType<UnitModel>,
         default: () => ({
             name: "-"
         })
     },
-})
-
-watch(
-    () => props.object,
-    () => {
-        state.data = props.object
-    }
-)
-
-const state = reactive({
-    data: props.object
 })
 </script>
 

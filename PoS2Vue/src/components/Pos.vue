@@ -1,32 +1,22 @@
 <template>
-    <div :class="{ not_modal: !isModalHidden }">
+    <div>
         <h1>ออกใบเสร็จรับเงิน</h1>
         <label>เลขที่เอกสาร</label><br>
         <input disabled v-model="state.receipt.code"><br>
         <label>วันที่</label><br>
         <input disabled v-model="state.receipt.date"><br>
     </div>
-    <div v-show="!state.isModalHidden" :class="{ modal: !state.isModalHidden }">
-        <!-- <PosModal :item="state.selectedItem" @ModalClose="onClose" @ModalSave="onModalSave">
-        </PosModal> -->
-        <Modal :modalFor="'form'" @ModalClose="onClose">
-            <template v-slot:form>
-                <PosForm :item="state.selectedItem" @submitted="onModalSave">
-                </PosForm>
-            </template>
-        </Modal>
-    </div>
-    <div v-show="!state.isPreviewHidden" :class="{ modal: !state.isPreviewHidden}">
-        <!-- <ReceiptDetailModal :receipt="state.receipt" @ModalClose="onClose">
-        </ReceiptDetailModal> -->
-        <Modal :modalFor="'detail'" @ModalClose="onClose">
-            <template v-slot:detail>
-                <ReceiptDetailTable :receipt="state.receipt">
-                </ReceiptDetailTable>
-            </template>
-        </Modal>
-    </div>
-    <table :class="{ not_modal: !isModalHidden }">
+    <Modal :showed="!state.isModalHidden">
+        <PosForm :item="state.selectedItem" @submitted="onModalSave"/>
+        <template v-slot:footer>
+            <button @click="onClose">close</button><br>
+            <button @click="onSave">save changes</button><br>
+        </template>
+    </Modal>
+    <Modal :showed="!state.isPreviewHidden" @ModalClose="onClose">
+        <ReceiptDetailTable :receipt="state.receipt" />
+    </Modal>
+    <table>
         <thead>
             <tr>
                 <th>No.</th>
@@ -86,7 +76,7 @@
             </tr>
         </tbody>
     </table>
-    <div :class="{ not_modal: !isModalHidden }">
+    <div>
         <label>ยอดรวมสินค้าก่อนส่วนลด</label>
         <input disabled type="number" v-model="state.receipt.total_amount"><br>
         <label>ยอดรวมส่วนลดสินค้า</label>
@@ -106,20 +96,21 @@
 import { computed, inject, reactive, ref } from 'vue'
 import {
     addReceipt,
-} from '../api/api.js'
+} from '@/api/api'
 import type { OrderModel } from '@/interfaces/Order'
-import type { GlobalState, PoSState } from '@/interfaces/State'
+import type { GlobalState, PosState } from '@/interfaces/State'
 
-import PosModal from '@/components/PosModal.vue'
-import ReceiptDetailModal from '../components/ReceiptDetailModal.vue'
 import Modal from '@/components/Modal.vue'
 import PosForm from '@/components/PosForm.vue'
 import ReceiptDetailTable from '@/components/ReceiptDetailTable.vue'
+import { modalActionState } from '@/states/modal'
 
 const globalState = inject("state") as GlobalState
 const isModalHidden = computed(() => globalState.isModalHidden)
 
-const state: PoSState = reactive({
+const currentModal = ref<string>()
+
+const state: PosState = reactive({
     receipt: {
         code: "TXXXX",
         date: "",
@@ -265,7 +256,7 @@ function reCalcReceiptSummary() {
 
 function openAdd() {
     state.isModalHidden = false
-    document.body.style.backgroundColor = "lightgray"
+    currentModal.value = "selectItem"
     globalState.isModalHidden = false
 
     state.selectedItem.item_id = 0
@@ -279,7 +270,7 @@ function openAdd() {
 
 function openEdit(index: string, order: OrderModel) {
     state.isModalHidden = false
-    document.body.style.backgroundColor = "lightgray"
+    currentModal.value = "selectItem"
     globalState.isModalHidden = false
 
     state.selectedItem.item_id = order.item_id
@@ -290,6 +281,12 @@ function openEdit(index: string, order: OrderModel) {
     state.selectedItem.item_unit_id = order.item_unit_id
     state.editTarget = +index
 }
+
+function onSave() {
+    modalActionState.needSubmit()
+    onClose()
+}
+
 function onModalSave(selectedItem: OrderModel) {
     if (state.editTarget != undefined) {
         state.receipt.orders[state.editTarget] = {...selectedItem}
@@ -311,7 +308,7 @@ function onPreview() {
 
     if (!containEmptyQuantity) {
         state.isPreviewHidden = false
-        document.body.style.backgroundColor = "lightgray"
+        currentModal.value = "preview"
         globalState.isModalHidden = false
     }
     else {
@@ -319,15 +316,14 @@ function onPreview() {
     }
 }
 
-function onClose(closeFrom: string) {
-    if (closeFrom == "form") {
+function onClose() {
+    if (currentModal.value == "selectItem") {
         state.isModalHidden = true
     }
-    else if (closeFrom == "detail") {
+    else if (currentModal.value == "preview") {
         state.isPreviewHidden = true
     }
 
-    document.body.style.backgroundColor = "black"
     globalState.isModalHidden = true
 }
 

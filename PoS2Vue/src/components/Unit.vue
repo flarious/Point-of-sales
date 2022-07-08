@@ -1,19 +1,16 @@
 <template>
-    <div :class="{ not_modal: !isModalHidden }">
+    <div>
         <h1>ตั้งค่าหน่วยนับ</h1>
         <button @click="onAdd">เพิ่ม</button>
     </div>
-    <div v-show="!isModalHidden" :class="{ modal: !isModalHidden }">
-        <!-- <UnitModal :mode="state.mode" :editTarget="state.editTarget" :unit="state.unit" @ModalClose="onClose" @ModalSave="getUnits">
-        </UnitModal> -->
-        <Modal :modalFor="'form'" @ModalClose="onClose">
-            <template v-slot:form>
-                <UnitForm :mode="state.mode" :editTarget="state.editTarget" :unit="state.unit" @submitted="getUnits">
-                </UnitForm>
-            </template>
-        </Modal>
-    </div>
-    <table :class="{ not_modal: !isModalHidden }"> 
+    <Modal :showed="!isModalHidden">
+        <UnitForm :mode="state.mode" :editTarget="state.editTarget" :unit="state.unit" @submitted="getUnits" />
+        <template v-slot:footer>
+            <button @click="onClose">close</button><br>
+            <button @click="onSave">save changes</button><br>
+        </template>
+    </Modal>
+    <table> 
         <tr>
             <td>
                 <table>
@@ -33,10 +30,10 @@
             </td>
             <td>
                 <DataCard :dataLength="state.units.length" :selectedIndex="state.currentUnitIndex" 
-                @update:selectedIndex="newIndex => selectItem(newIndex)" @onCardEditPressed="onEdit(state.units[state.currentUnitIndex])" 
-                @onCardDeletePressed="onDelete(state.units[state.currentUnitIndex])">
+                @update:selectedIndex="newIndex => selectItem(newIndex)" @onCardEditPressed="onEdit" 
+                @onCardDeletePressed="onDelete">
                     <template v-slot:detail>
-                        <UnitDetail :object="state.currentUnitIndex != undefined ? state.units[state.currentUnitIndex] : undefined">
+                        <UnitDetail :object="currentUnit">
                         </UnitDetail>
                     </template>
                 </DataCard>
@@ -51,18 +48,20 @@ import { reactive, inject, computed } from 'vue'
 import {
     getUnitsList,
     deleteUnit,
-} from '../api/api.js'
-import type { Unit } from '../interfaces/Unit' 
-import type { UnitState, GlobalState } from '../interfaces/State'
+} from '@/api/api'
+import type { Unit } from '@/interfaces/Unit' 
+import type { UnitState, GlobalState } from '@/interfaces/State'
 
-import UnitModal from '@/components/UnitModal.vue'
 import DataCard from '@/components/DataCard.vue'
 import UnitDetail from '@/components/UnitDetail.vue'
 import Modal from '@/components/Modal.vue'
 import UnitForm from '@/components/UnitForm.vue'
+import { modalActionState } from '@/states/modal'
 
 const globalState = inject("state") as GlobalState
 const isModalHidden = computed(() => globalState.isModalHidden)
+
+const currentUnit = computed((): Unit | undefined => state.units[state.currentUnitIndex!])
 
 const state: UnitState = reactive({
     unit: {
@@ -89,16 +88,14 @@ async function getUnits() {
 
 function onAdd() {
     state.mode = "เพิ่มหน่วยนับ"
-    document.body.style.backgroundColor = "lightgray"
     globalState.isModalHidden = false
 
     state.unit.name = ""
     state.editTarget = undefined
 }
 
-function onEdit(unit: Unit) {
+function editUnit(unit: Unit) {
     state.mode = "แก้ไขหน่วยนับ"
-    document.body.style.backgroundColor = "lightgray"
     globalState.isModalHidden = false
 
     state.unit.name = unit.name
@@ -106,11 +103,15 @@ function onEdit(unit: Unit) {
 }
 
 function onClose() {
-    document.body.style.backgroundColor = "black"
     globalState.isModalHidden = true
 }
 
-async function onDelete(unit: Unit) {
+function onSave() {
+    modalActionState.needSubmit()
+    onClose()
+}
+
+async function deleteUnitData(unit: Unit) {
     const response = await deleteUnit(unit.id)
 
     if (response.code != 200) {
@@ -124,5 +125,19 @@ async function onDelete(unit: Unit) {
 function selectItem(index: number) {
     state.currentUnitIndex = index
 }
+
+function onEdit() {
+    editUnit(state.units[state.currentUnitIndex!])
+}
+
+function onDelete() {
+    deleteUnitData(state.units[state.currentUnitIndex!])
+}
+
+
+
 </script>
 
+<style scoped>
+@import '@/assets/selection.css';
+</style>

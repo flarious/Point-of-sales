@@ -1,14 +1,8 @@
 <script setup lang="ts">
-import { ref, inject, computed } from 'vue'
-import { RouterLink, RouterView } from 'vue-router'
-import type { GlobalState } from './interfaces/State'
-
-const state = inject("state") as GlobalState
-const isModalHidden = computed(() => state.isModalHidden)
 </script>
 
 <template>
-  <header :class="{ not_modal : !isModalHidden }">
+  <header>
     <nav>
         <button><router-link v-bind:to="{name: 'unit'}">ตั้งค่าหน่วยนับ</router-link></button>
         <button><router-link v-bind:to="{name: 'item'}">ตั้งค่าสินค้า</router-link></button>
@@ -22,7 +16,6 @@ const isModalHidden = computed(() => state.isModalHidden)
 
 <style>
 @import '@/assets/base.css';
-@import '@/assets/modal.css';
 
 #app {
   max-width: 1280px;

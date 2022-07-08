@@ -46,17 +46,19 @@
 </template>
 
 <script setup lang="ts">
+import type { ReceiptDetail } from '@/interfaces/Receipt'
+import type { PropType } from 'vue'
 import { reactive, watch } from 'vue'
 import {
     getOneReceipt,
-} from '../api/api.js'
+} from '@/api/api'
 
 const props = defineProps({
     receiptId: {
         type: Number,
     },
     receipt: {
-        type: Object,
+        type: Object as PropType<ReceiptDetail>,
         default: () => ({
             id: 0,
             code: "",

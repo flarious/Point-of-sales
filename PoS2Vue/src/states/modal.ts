@@ -1,18 +1,12 @@
 import { reactive } from 'vue'
 
 export const modalActionState = reactive({
-    shouldResetModal: false,
-    shouldSubmitModal: false,
+    resetModalCounter: 0,
+    submitModalCounter: 0,
     needReset() {
-        this.shouldResetModal = true
+        this.resetModalCounter++
     },
     needSubmit() {
-        this.shouldSubmitModal = true
-    },
-    resetted() {
-        this.shouldResetModal = false
-    },
-    submitted() {
-        this.shouldSubmitModal = false
+        this.submitModalCounter++
     },
 })

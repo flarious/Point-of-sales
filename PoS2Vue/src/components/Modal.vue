@@ -1,18 +1,30 @@
 <template>
-    <slot name="form"></slot>
-    <slot name="form_default"></slot>
-    <slot name="detail"></slot>
-    <button @click="onClose">close</button><br>
-    <button @click="onSave" v-if="modalFor !== 'detail'">save changes</button><br>
-    <button @click="onDefault" v-if="modalFor === 'form_default'">default</button>
+    <div v-show="showed" class="modal">
+        <div class="modal-content">
+            <!-- <slot name="form"></slot>
+            <slot name="form_default"></slot>
+            <slot name="detail"></slot> -->
+            <slot></slot>
+            <slot name="footer">
+                <button @click="onClose">close</button><br>
+            </slot>
+            
+            <!-- <button @click="onSave" v-if="modalFor !== 'detail'">save changes</button><br>
+            <button @click="onDefault" v-if="modalFor === 'form_default'">default</button> -->
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
-import { modalActionState } from '@/states/modal'
+import type { GlobalState } from '@/interfaces/State'
+import { computed, inject } from 'vue'
+
+// const globalState = inject("state") as GlobalState
+// const isModalHidden = computed(() => globalState.isModalHidden)
 
 const props = defineProps({
-    modalFor: {
-        type: String,
+    showed: {
+        type: Boolean,
     }
 })
 
@@ -21,15 +33,19 @@ const emits = defineEmits({
 })
 
 function onClose() {
-    emits("ModalClose", props.modalFor!)
+    emits("ModalClose")
 }
 
-async function onSave() {
-    modalActionState.needSubmit()
-    onClose()
-}
+// async function onSave() {
+//     modalActionState.needSubmit()
+//     onClose()
+// }
 
-function onDefault() {
-    modalActionState.needReset()
-}
+// function onDefault() {
+//     modalActionState.needReset()
+// }
 </script>
+
+<style scoped>
+@import '@/assets/modal.css';
+</style>

@@ -5,13 +5,14 @@
 </template>
 
 <script setup lang="ts">
-import type { GlobalState } from '@/interfaces/State.js'
-import { computed, inject, reactive, watch } from 'vue'
+import { reactive, watch } from 'vue'
 import {
     addUnit,
     editUnit,
-} from '../api/api.js'
+} from '@/api/api'
 import { modalActionState } from '@/states/modal'
+import type { UnitModel } from '@/interfaces/Unit.js'
+import type { PropType } from 'vue'
 
 const props = defineProps({
     mode: {
@@ -21,24 +22,21 @@ const props = defineProps({
         type: Number,
     },
     unit: {
-        type: Object,
+        type: Object as PropType<UnitModel>,
         default: () => ({
                 name: "",
         })
     },
 })
 
-const globalState = inject("state") as GlobalState
-const isModalHidden = computed(() => globalState.isModalHidden)
-
 const emit = defineEmits({
     submitted: null,
 })
 
 watch(
-    () => modalActionState.shouldSubmitModal,
-    async () => {
-        if(modalActionState.shouldSubmitModal) {
+    () => modalActionState.submitModalCounter,
+    async (newValue, oldValue) => {
+        if (newValue > oldValue) {
             var response
             if (props.editTarget != undefined) {
                 response = await editUnit(props.editTarget, state.modalUnit)
@@ -52,7 +50,6 @@ watch(
                 return
             }
 
-            modalActionState.submitted()
             emit("submitted")
         }
     }

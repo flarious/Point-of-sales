@@ -1,5 +1,5 @@
 <template>
-    <div :class="{ not_modal: !isModalHidden }">
+    <div>
         <h1>ดูใบเสร็จรับเงิน</h1>
         <label for="startDate">วันที่เริ่มต้น :</label>
         <input type="date" name="startDate" v-model="state.startDate">
@@ -7,17 +7,10 @@
         <input type="date" name="endDate" v-model="state.endDate">
         <button @click="filterReceipts">ค้นหา</button>
     </div>
-    <div v-show="!isModalHidden" :class="{ modal: !isModalHidden }">
-        <!-- <ReceiptDetailModal :receiptId="state.receiptId" @ModalClose="onClose">
-        </ReceiptDetailModal> -->
-        <Modal :modalFor="'detail'" @ModalClose="onClose">
-            <template v-slot:detail>
-                <ReceiptDetailTable :receiptId="state.receiptId">
-                </ReceiptDetailTable>
-            </template>
-        </Modal>
-    </div>
-    <table :class="{ not_modal: !isModalHidden }">
+    <Modal :showed="!isModalHidden" @ModalClose="onClose">
+        <ReceiptDetailTable :receiptId="state.receiptId" />
+    </Modal>
+    <table>
         <thead>
             <tr>
                 <th>No.</th>
@@ -50,7 +43,6 @@ import {
 import type { Receipt } from '../interfaces/Receipt'
 import type { GlobalState, ReceiptState } from '../interfaces/State'
 
-import ReceiptDetailModal from '../components/ReceiptDetailModal.vue'
 import Modal from '@/components/Modal.vue'
 import ReceiptDetailTable from '@/components/ReceiptDetailTable.vue'
 
@@ -100,14 +92,12 @@ function yyyyMMddToddMMyyyy(yyyyMMdd: string) {
 }
 
 function viewReceipt(receipt: Receipt) {
-    document.body.style.backgroundColor = "lightgray"
     globalState.isModalHidden = false
 
     state.receiptId = receipt.id
 }
 
 function onClose() {
-    document.body.style.backgroundColor = "black"
     globalState.isModalHidden = true
 }
 </script>

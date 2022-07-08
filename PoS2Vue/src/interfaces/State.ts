@@ -1,39 +1,45 @@
-import type { Item, ItemModel } from "./Item";
-import type { OrderModel } from "./Order";
+import type { Item, ItemModel, ItemDetail } from "./Item";
+import type { Order, OrderModel } from "./Order";
 import type { Receipt, ReceiptModel } from "./Receipt";
 import type { Unit, UnitModel } from "./Unit";
 
 export interface GlobalState {
-    isModalHidden: boolean,
+    isModalHidden: boolean
 }
 
 export interface ItemState {
-    item: ItemModel,
-    mode: string,
-    editTarget?: number,
-    currentUnitIndex?: number,
-    items: Item[],
+    item: ItemModel
+    mode: string
+    editTarget?: number
+    currentUnitIndex?: number
+    items: Item[]
 }
 
-export interface PoSState {
-    receipt: ReceiptModel,
-    isModalHidden: boolean,
-    isPreviewHidden: boolean,
-    editTarget?: number,
-    selectedItem: OrderModel,
+export interface PosState {
+    receipt: ReceiptModel
+    isModalHidden: boolean
+    isPreviewHidden: boolean
+    editTarget?: number
+    selectedItem: OrderModel
+}
+
+export interface PosFormState {
+    modalItem: OrderModel
+    selectedItem: ItemDetail
+    items: Item[]
 }
 
 export interface UnitState {
-    unit: UnitModel,
-    mode: string,
-    editTarget?: number,
-    currentUnitIndex?: number,
-    units: Unit[],
+    unit: UnitModel
+    mode: string
+    editTarget?: number
+    currentUnitIndex?: number
+    units: Unit[]
 }
 
 export interface ReceiptState {
-    receipts: Receipt[],
-    receiptId?: number,
-    startDate: string,
-    endDate: string,
+    receipts: Receipt[]
+    receiptId?: number
+    startDate: string
+    endDate: string
 }
