@@ -10,14 +10,14 @@
     <Modal :showed="!isModalHidden" @ModalClose="onClose">
         <ReceiptDetailTable :receiptId="state.receiptId" />
     </Modal>
-    <table>
+    <table class="table">
         <thead>
             <tr>
                 <th>No.</th>
                 <th>เลขที่เอกสาร</th>
                 <th>วันที่</th>
                 <th>Grand Total</th>
-                <th>ดำเนินการ</th>
+                <th class="center">ดำเนินการ</th>
             </tr>
         </thead>
         <tbody>
@@ -26,7 +26,7 @@
                 <td>{{ receipt.code }}</td>
                 <td>{{ receipt.date }}</td>
                 <td>{{ receipt.grand_total }}</td>
-                <td>
+                <td class="center">
                     <button @click="viewReceipt(receipt)">ดูรายละเอียด</button>
                 </td>
             </tr>
@@ -101,3 +101,7 @@ function onClose() {
     globalState.isModalHidden = true
 }
 </script>
+
+<style scoped>
+@import '@/assets/table.css';
+</style>

@@ -4,7 +4,7 @@
     <input v-model="state.receipt.code" disabled><br>
     <label>วันที่</label><br>
     <input v-model="state.receipt.date" disabled><br>
-    <table>
+    <table class="table">
         <thead>
             <tr>
                 <th>No.</th>
@@ -32,17 +32,18 @@
             </tr>
         </tbody>
     </table>
-
-    <label>ยอดรวมสินค้าก่อนส่วนลด</label>
-    <input v-model="state.receipt.total_amount" disabled type="number"><br>
-    <label>ยอดรวมส่วนลดสินค้า</label>
-    <input v-model="state.receipt.total_discount_amount" disabled type="number"><br>
-    <label>Subtotal</label>
-    <input v-model="state.receipt.subtotal" disabled type="number"><br>
-    <label>ส่วนลดการค้า</label>
-    <input v-model="state.receipt.trade_discount" disabled type="number"><br>
-    <label>Grand total</label>
-    <input v-model="state.receipt.grand_total" disabled type="number"><br>
+    <div class="summary">
+        <label>ยอดรวมสินค้าก่อนส่วนลด</label>
+        <input v-model="state.receipt.total_amount" disabled type="number"><br>
+        <label>ยอดรวมส่วนลดสินค้า</label>
+        <input v-model="state.receipt.total_discount_amount" disabled type="number"><br>
+        <label>Subtotal</label>
+        <input v-model="state.receipt.subtotal" disabled type="number"><br>
+        <label>ส่วนลดการค้า</label>
+        <input v-model="state.receipt.trade_discount" disabled type="number"><br>
+        <label>Grand total</label>
+        <input v-model="state.receipt.grand_total" disabled type="number"><br>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -97,3 +98,8 @@ async function getReceipt(id: number) {
     state.receipt = {...response.data}
 }
 </script>
+
+<style scoped>
+@import '@/assets/table.css';
+@import '@/assets/receipt.css';
+</style>

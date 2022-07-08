@@ -1,18 +1,20 @@
 <template>
-    <div>
-        <h1>ตั้งค่าหน่วยนับ</h1>
-        <button @click="onAdd">เพิ่ม</button>
-    </div>
+    <h1>ตั้งค่าหน่วยนับ</h1>
     <Modal :showed="!isModalHidden">
         <UnitForm :mode="state.mode" :editTarget="state.editTarget" :unit="state.unit" @submitted="getUnits" />
         <template v-slot:footer>
-            <button @click="onClose">close</button><br>
-            <button @click="onSave">save changes</button><br>
+            <div class="modal-button">
+                <button @click="onClose">close</button>
+                <button @click="onSave">save changes</button>
+            </div>
         </template>
     </Modal>
     <table> 
         <tr>
-            <td>
+            <td class="table">
+                <div class="table-button"> 
+                    <button @click="onAdd">เพิ่ม</button>
+                </div>
                 <table>
                     <thead>
                         <tr>
@@ -23,7 +25,7 @@
                     <tbody>
                         <tr :class="{ selected: state.currentUnitIndex == index }" @click="selectItem(index)" v-for="(unit, index) in state.units" :key="index">
                             <td>{{ index + 1 }}</td>
-                            <td>{{ unit.name }}</td>
+                            <td class="important">{{ unit.name }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -140,4 +142,6 @@ function onDelete() {
 
 <style scoped>
 @import '@/assets/selection.css';
+@import '@/assets/table.css';
+@import '@/assets/modal.css';
 </style>

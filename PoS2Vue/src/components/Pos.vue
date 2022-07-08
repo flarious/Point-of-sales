@@ -9,14 +9,17 @@
     <Modal :showed="!state.isModalHidden">
         <PosForm :item="state.selectedItem" @submitted="onModalSave"/>
         <template v-slot:footer>
-            <button @click="onClose">close</button><br>
-            <button @click="onSave">save changes</button><br>
+            <div class="modal-button">
+                <button @click="onClose">close</button>
+                <button @click="onSave">save changes</button>
+            </div>
+            
         </template>
     </Modal>
     <Modal :showed="!state.isPreviewHidden" @ModalClose="onClose">
         <ReceiptDetailTable :receipt="state.receipt" />
     </Modal>
-    <table>
+    <table class="table">
         <thead>
             <tr>
                 <th>No.</th>
@@ -28,7 +31,7 @@
                 <th>ส่วนลด (%)</th>
                 <th>ส่วนลด (บาท)</th>
                 <th>รวมเงิน</th>
-                <th>ดำเนินการ</th>
+                <th class="center">ดำเนินการ</th>
             </tr>
         </thead>
         <tbody>
@@ -48,7 +51,7 @@
                 </td>
                 <td>{{ order.item_discount_amount }}</td>
                 <td>{{ order.item_total_amount }}</td>
-                <td>
+                <td class="center">
                     <button @click="onDelete(index)">ลบ</button>
                 </td>
             </tr>
@@ -70,13 +73,13 @@
                     <input disabled type="number" value="0">
                 </td>
                 <td>0</td>
-                <td>
+                <td class="center">
                     <button disabled>ลบ</button>
                 </td>
             </tr>
         </tbody>
     </table>
-    <div>
+    <div class="summary">
         <label>ยอดรวมสินค้าก่อนส่วนลด</label>
         <input disabled type="number" v-model="state.receipt.total_amount"><br>
         <label>ยอดรวมส่วนลดสินค้า</label>
@@ -361,3 +364,8 @@ async function onSubmit() {
 }
 </script>
 
+<style scoped>
+@import '@/assets/table.css';
+@import '@/assets/receipt.css';
+@import '@/assets/modal.css';
+</style>

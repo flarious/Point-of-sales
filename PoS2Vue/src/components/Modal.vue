@@ -6,7 +6,9 @@
             <slot name="detail"></slot> -->
             <slot></slot>
             <slot name="footer">
-                <button @click="onClose">close</button><br>
+                <div class="modal-button">
+                    <button @click="onClose">close</button><br>
+                </div>
             </slot>
             
             <!-- <button @click="onSave" v-if="modalFor !== 'detail'">save changes</button><br>

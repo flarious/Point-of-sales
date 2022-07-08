@@ -1,0 +1,14 @@
+.card {
+    display: flex;
+    justify-content: space-between;
+}
+.card div {
+    border-style: solid;
+    border-width: 1px; 
+    width: 90%;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+.card button {
+    height: fit-content;
+}

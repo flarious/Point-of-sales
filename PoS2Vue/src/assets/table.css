@@ -1,0 +1,24 @@
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+}
+
+.center {
+    text-align: center;
+}
+
+td .important {
+    width: 70%;
+}
+
+.table th, .table td {
+    border: 1px solid;
+}
+
+.table-button {
+    float: right;
+}

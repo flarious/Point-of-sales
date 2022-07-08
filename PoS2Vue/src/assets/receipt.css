@@ -1,0 +1,10 @@
+.summary {
+    width: max-content;
+    margin-left: auto;
+    margin-right: 0;
+    text-align: right;
+}
+
+.summary label {
+    float: left;
+}

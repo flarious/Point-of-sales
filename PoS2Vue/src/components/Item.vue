@@ -1,19 +1,23 @@
 <template>
     <div>
         <h1>ตั้งค่าสินค้า</h1>
-        <button @click="onAdd">เพิ่ม</button>
     </div>
     <Modal :showed="!isModalHidden">
         <ItemForm :mode="state.mode" :item="state.item" :editTarget="state.editTarget" @submitted="getItems" />
         <template v-slot:footer>
-            <button @click="onClose">close</button><br>
-            <button @click="onSave">save changes</button><br>
-            <button @click="onDefault">default</button>
+            <div class="modal-button">
+                <button @click="onClose">close</button>
+                <button @click="onSave">save changes</button>
+                <button @click="onDefault">default</button>
+            </div>
         </template>
     </Modal>
     <table>
         <tr>
-            <td>
+            <td class="table">
+                <div class="table-button"> 
+                    <button @click="onAdd">เพิ่ม</button>
+                </div>
                 <table>
                     <thead>
                         <tr>
@@ -26,7 +30,7 @@
                         <tr :class="{ selected: state.currentUnitIndex == index }" @click="selectItem(index)" v-for="(item, index) in state.items" :key="index">
                             <td>{{ index + 1 }}</td>
                             <td>{{ item.code }}</td>
-                            <td>{{ item.name }}</td>
+                            <td class="important">{{ item.name }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -152,4 +156,6 @@ function selectItem(index: number) {
 
 <style scoped>
 @import '@/assets/selection.css';
+@import '@/assets/table.css';
+@import '@/assets/modal.css';
 </style>
